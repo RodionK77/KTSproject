@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,10 +43,12 @@ import org.jetbrains.compose.resources.stringResource
 fun WelcomeScreen(onNavigateToLogin: () -> Unit) {
 
     var showImage by rememberSaveable { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -95,7 +99,7 @@ fun WelcomeScreen(onNavigateToLogin: () -> Unit) {
             onClick = onNavigateToLogin,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(top = 16.dp, bottom = 16.dp)
                 .height(50.dp),
             shape = MaterialTheme.shapes.medium,
         ) {

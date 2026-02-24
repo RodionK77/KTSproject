@@ -1,0 +1,17 @@
+<resources>
+    <string name="welcome">Добро пожаловать</string>
+    <string name="welcome_image">Приветственное изображение</string>
+    <string name="show_image">Показать картинку</string>
+    <string name="hide_image">Скрыть картинку</string>
+    <string name="ready_to_work">Готовы начать работу? Авторизуйтесь для продолжения.</string>
+    <string name="go_to_login">Начать работу</string>
+    <string name="login_image">Изображение логина</string>
+    <string name="email">Email</string>
+    <string name="email_icon">Иконка ввода почты</string>
+    <string name="password">Пароль</string>
+    <string name="password_icon">Иконка ввода пароля</string>
+    <string name="enter_password">Введите пароль</string>
+    <string name="no_account">Ещё нет аккаунта?</string>
+    <string name="register"> Зарегистрируйтесь</string>
+    <string name="enter">Войти</string>
+</resources>

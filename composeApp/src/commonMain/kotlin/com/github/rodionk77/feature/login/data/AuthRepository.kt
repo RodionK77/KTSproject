@@ -1,7 +1,9 @@
 package com.github.rodionk77.feature.login.data
 
+import com.github.rodionk77.common.GitHubApiException
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Tokens
+import com.github.rodionk77.common.UnknownServerException
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -33,13 +35,13 @@ class AuthRepository (
             val tokenResponse: GitHubTokenResponse = response.body()
 
             if (tokenResponse.error != null) {
-                Result.failure(Exception("GitHub Error: ${tokenResponse.errorDescription ?: tokenResponse.error}"))
+                Result.failure(GitHubApiException("GitHub Error: ${tokenResponse.errorDescription ?: tokenResponse.error}"))
             }
             else if (tokenResponse.accessToken != null) {
                 Result.success(tokenResponse.accessToken)
             }
             else {
-                Result.failure(Exception(getString(Res.string.unknown_server_answer)))
+                Result.failure(UnknownServerException())
             }
         } catch (e: Exception) {
             Result.failure(e)

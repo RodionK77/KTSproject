@@ -57,9 +57,6 @@ fun LoginScreen(
         viewModel.effect.collect { event ->
             when (event) {
                 is LoginUiEvent.NavigateToMain -> onNavigateToMain()
-                is LoginUiEvent.ShowError -> {
-                    Napier.d {"Ошибка на экране логина: ${event.message}"}
-                }
             }
         }
     }
@@ -98,9 +95,9 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        uiState.error?.let { errorMsg ->
+        uiState.error?.let { errorText ->
             Text(
-                text = errorMsg,
+                text = errorText.asString(),
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 16.dp)
             )

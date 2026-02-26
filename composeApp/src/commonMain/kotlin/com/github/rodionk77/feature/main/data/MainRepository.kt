@@ -1,5 +1,6 @@
 package com.github.rodionk77.feature.main.data
 
+import com.github.rodionk77.common.TokenNotFoundException
 import com.github.rodionk77.common.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -17,7 +18,7 @@ class MainRepository(
 
     suspend fun getRepositories(): Result<List<RepoEntity>> {
         val token = tokenStorage.getToken()
-            ?: return Result.failure(Exception(getString(Res.string.token_not_detected)))
+            ?: return Result.failure(TokenNotFoundException())
 
         return try {
             val response = httpClient.get("https://api.github.com/user/repos") {
@@ -34,7 +35,7 @@ class MainRepository(
 
     suspend fun getProfile(): Result<UserEntity> {
         val token = tokenStorage.getToken()
-            ?: return Result.failure(Exception(getString(Res.string.token_not_detected)))
+            ?: return Result.failure(TokenNotFoundException())
 
         return try {
             val response = httpClient.get("https://api.github.com/user") {

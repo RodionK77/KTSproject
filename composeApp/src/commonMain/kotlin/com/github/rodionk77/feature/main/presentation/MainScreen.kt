@@ -67,7 +67,7 @@ fun MainScreen(viewModel: MainViewModel) {
 
             uiState.error != null -> {
                 Text(
-                    text = "${stringResource(Res.string.error)}: ${uiState.error}",
+                    text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp)
                 )

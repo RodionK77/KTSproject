@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.main.data
+package com.github.rodionk77.feature.repos.data
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
@@ -11,5 +11,13 @@ data class RepoEntity(
     val name: String,
     val description: String? = null,
     @SerialName("html_url") val htmlUrl: String,
-    val language: String? = null
+    val language: String? = null,
+    val owner: OwnerEntity
+)
+
+@Immutable
+@Serializable
+data class OwnerEntity(
+    val login: String,
+    @SerialName("avatar_url") val avatarUrl: String? = null
 )

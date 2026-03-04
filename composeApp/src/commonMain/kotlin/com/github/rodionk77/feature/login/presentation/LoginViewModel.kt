@@ -8,6 +8,7 @@ import com.github.rodionk77.common.LoginRoute
 import com.github.rodionk77.common.UiText
 import com.github.rodionk77.common.UnknownServerException
 import com.github.rodionk77.feature.login.data.AuthRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,8 +20,6 @@ import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.unknown_error
 import ktsproject.composeapp.generated.resources.unknown_server_answer
-import org.jetbrains.compose.resources.getString
-
 
 data class LoginUiState (
     val isLoading: Boolean = false,
@@ -44,6 +43,8 @@ class LoginViewModel(
     private val _effect = MutableSharedFlow<LoginUiEvent>()
     val effect: SharedFlow<LoginUiEvent> = _effect.asSharedFlow()
 
+    private var loadJob: Job? = null
+
     init {
         val route = savedStateHandle.toRoute<LoginRoute>()
         route.code?.let {
@@ -53,8 +54,8 @@ class LoginViewModel(
 
     fun handleOAuthCode(code: String) {
         if (_uiState.value.isLoading) return
-
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.update{it.copy(isLoading = true)}
 
             val result = repository.exchangeCodeForToken(code)
@@ -73,5 +74,9 @@ class LoginViewModel(
                 _uiState.update{it.copy(isLoading = false, error = errorText)}
             }
         }
+    }
+
+    fun cancelLoading() {
+        loadJob?.cancel()
     }
 }

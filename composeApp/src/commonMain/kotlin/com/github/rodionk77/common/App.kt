@@ -13,12 +13,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.github.rodionk77.common.AppContainer.authRepository
-import com.github.rodionk77.common.AppContainer.mainRepository
+import com.github.rodionk77.common.AppContainer.repoDescriptionRepository
+import com.github.rodionk77.common.AppContainer.reposRepository
 import com.github.rodionk77.feature.login.presentation.LoginScreen
 import com.github.rodionk77.feature.login.presentation.LoginViewModel
 import com.github.rodionk77.feature.login.presentation.WelcomeScreen
-import com.github.rodionk77.feature.main.presentation.MainScreen
-import com.github.rodionk77.feature.main.presentation.MainViewModel
+import com.github.rodionk77.feature.repoDescription.presentation.RepoDescriptionScreen
+import com.github.rodionk77.feature.repoDescription.presentation.RepoDescriptionViewModel
+import com.github.rodionk77.feature.repos.presentation.ReposScreen
+import com.github.rodionk77.feature.repos.presentation.ReposViewModel
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.Serializable
@@ -28,7 +31,9 @@ object WelcomeRoute
 @Serializable
 data class LoginRoute(val code: String? = null)
 @Serializable
-object MainRoute
+object ReposRoute
+@Serializable
+data class RepoDescriptionRoute(val repoName: String, val ownerLogin: String)
 
 
 @Composable
@@ -77,7 +82,7 @@ fun App() {
                     LoginScreen(
                         viewModel = loginViewModel,
                         onNavigateToMain = {
-                            navController.navigate(MainRoute) {
+                            navController.navigate(ReposRoute) {
                                 popUpTo(0) {
                                     inclusive = true
                                 }
@@ -86,11 +91,27 @@ fun App() {
                         }
                     )
                 }
-                composable<MainRoute> {
-                    val mainViewModel = viewModel {
-                        MainViewModel(repository = mainRepository)
+                composable<ReposRoute> {
+                    val reposViewModel = viewModel {
+                        ReposViewModel(repository = reposRepository)
                     }
-                    MainScreen(mainViewModel)
+                    ReposScreen(
+                        viewModel = reposViewModel,
+                        onNavigateToRepo = { repoName, ownerLogin ->
+                            navController.navigate(RepoDescriptionRoute(repoName, ownerLogin))
+                        })
+                }
+                composable<RepoDescriptionRoute> {
+                    val repoDescriptionViewModel = viewModel {
+                        RepoDescriptionViewModel(
+                            repository = repoDescriptionRepository,
+                            savedStateHandle = createSavedStateHandle()
+                        )
+                    }
+                    RepoDescriptionScreen(
+                        viewModel = repoDescriptionViewModel,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
             }
         }

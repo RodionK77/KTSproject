@@ -1,6 +1,5 @@
-package com.github.rodionk77.feature.main.data
+package com.github.rodionk77.feature.repos.data
 
-import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

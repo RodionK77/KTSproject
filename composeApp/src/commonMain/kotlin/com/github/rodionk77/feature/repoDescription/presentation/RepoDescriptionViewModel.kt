@@ -1,12 +1,15 @@
-package com.github.rodionk77.feature.main.presentation
+package com.github.rodionk77.feature.repoDescription.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import com.github.rodionk77.common.RepoDescriptionRoute
 import com.github.rodionk77.common.TokenNotFoundException
 import com.github.rodionk77.common.UiText
-import com.github.rodionk77.feature.main.data.MainRepository
-import com.github.rodionk77.feature.main.data.RepoEntity
-import kotlinx.coroutines.async
+import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
+import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,55 +19,56 @@ import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.token_not_detected
 import ktsproject.composeapp.generated.resources.unknown_error
 
-data class MainUiState(
+data class RepoDescriptionUiState(
     val isLoading: Boolean = true,
-    val repos: List<RepoEntity> = emptyList(),
-    val username: String? = null,
-    val avatar: String? = null,
+    val repo: RepoDescriptionEntity? = null,
     val error: UiText? = null
 )
 
-class MainViewModel(
-    private val repository: MainRepository
+class RepoDescriptionViewModel(
+    private val repository: RepoDescriptionRepository,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MainUiState())
-    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(RepoDescriptionUiState())
+    val uiState: StateFlow<RepoDescriptionUiState> = _uiState.asStateFlow()
+
+    private val repoName: String = savedStateHandle.toRoute<RepoDescriptionRoute>().repoName
+    private val ownerLogin: String = savedStateHandle.toRoute<RepoDescriptionRoute>().ownerLogin
+
+    private var loadJob: Job? = null
 
     init {
         loadData()
     }
 
     private fun loadData() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val profileDeferred = async { repository.getProfile() }
-            val reposDeferred = async { repository.getRepositories() }
+            val result = repository.getRepository(ownerLogin, repoName)
 
-            val profileResult = profileDeferred.await()
-            val reposResult = reposDeferred.await()
-
-            if (profileResult.isSuccess && reposResult.isSuccess) {
+            if (result.isSuccess) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        username = profileResult.getOrNull()?.login,
-                        avatar = profileResult.getOrNull()?.avatarUrl,
-                        repos = reposResult.getOrNull() ?: emptyList()
+                        repo = result.getOrNull()
                     )
                 }
             } else {
-                val exception = profileResult.exceptionOrNull() ?: reposResult.exceptionOrNull()
-
+                val exception = result.exceptionOrNull()
                 val errorText = when (exception) {
                     is TokenNotFoundException -> UiText.StringRes(Res.string.token_not_detected)
                     else -> exception?.message?.let { UiText.DynamicString(it) }
                         ?: UiText.StringRes(Res.string.unknown_error)
                 }
-
                 _uiState.update { it.copy(isLoading = false, error = errorText) }
             }
         }
+    }
+
+    fun retry() {
+        loadData()
     }
 }

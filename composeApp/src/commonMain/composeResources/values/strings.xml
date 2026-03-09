@@ -23,4 +23,20 @@
     <string name="error">Ошибка</string>
     <string name="language">Язык</string>
     <string name="avatar">Аватар пользователя</string>
+    <string name="search">Поиск</string>
+    <string name="search_icon">Значок поиска</string>
+    <string name="clear_icon">Значок очистки</string>
+    <string name="retry">Повторить загрузку</string>
+    <string name="back_icon">Значок возврата назад</string>
+    <string name="stars">Звезды</string>
+    <string name="forks">Форки</string>
+    <string name="watchers">Наблюдатели</string>
+    <string name="open_issues">Открытые вопросы</string>
+    <string name="default_branch">Ветка по умолчанию</string>
+    <string name="created_at">Создан</string>
+    <string name="updated_at">Обновлен</string>
+    <string name="visibility">Видимость</string>
+    <string name="public_repo">Публичный</string>
+    <string name="private_repo">Приватный</string>
+    <string name="open_on_github">Посмотреть на GitHub</string>
 </resources>

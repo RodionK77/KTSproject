@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 class TokenStorage(private val dataStore: DataStore<Preferences>) {
@@ -22,7 +23,7 @@ class TokenStorage(private val dataStore: DataStore<Preferences>) {
     suspend fun getToken(): String? {
         return dataStore.data.map { preferences ->
             preferences[TOKEN_KEY]
-        }.first()
+        }.firstOrNull()
     }
 
     suspend fun clearToken() {

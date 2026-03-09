@@ -43,6 +43,7 @@ coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.re
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "coil" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "coil" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "coil" }
+ktor-client-logging = {module = "io.ktor:ktor-client-logging", version.ref = "coil"}
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "coil" }
 
 navigation-compose = {module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation"}

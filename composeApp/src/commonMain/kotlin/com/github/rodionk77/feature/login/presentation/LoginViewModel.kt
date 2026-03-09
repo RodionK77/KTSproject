@@ -4,10 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.github.rodionk77.common.LoginRoute
-import com.github.rodionk77.common.UiText
-import com.github.rodionk77.common.UnknownServerException
+import com.github.rodionk77.common.Route
+import com.github.rodionk77.common.Utils.UiText
+import com.github.rodionk77.common.Utils.UnknownServerException
 import com.github.rodionk77.feature.login.data.AuthRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,8 +20,6 @@ import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.unknown_error
 import ktsproject.composeapp.generated.resources.unknown_server_answer
-import org.jetbrains.compose.resources.getString
-
 
 data class LoginUiState (
     val isLoading: Boolean = false,
@@ -28,7 +27,7 @@ data class LoginUiState (
 )
 
 sealed interface LoginUiEvent {
-    object NavigateToMain : LoginUiEvent
+    object NavigateToRepos : LoginUiEvent
     /*data class ShowError(val message: UiText) : LoginUiEvent*/
 }
 
@@ -44,8 +43,10 @@ class LoginViewModel(
     private val _effect = MutableSharedFlow<LoginUiEvent>()
     val effect: SharedFlow<LoginUiEvent> = _effect.asSharedFlow()
 
+    private var loadJob: Job? = null
+
     init {
-        val route = savedStateHandle.toRoute<LoginRoute>()
+        val route = savedStateHandle.toRoute<Route.Login>()
         route.code?.let {
             handleOAuthCode(it)
         }
@@ -53,8 +54,8 @@ class LoginViewModel(
 
     fun handleOAuthCode(code: String) {
         if (_uiState.value.isLoading) return
-
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.update{it.copy(isLoading = true)}
 
             val result = repository.exchangeCodeForToken(code)
@@ -62,7 +63,7 @@ class LoginViewModel(
             result.onSuccess { token ->
                 repository.saveToken(token)
                 _uiState.update{it.copy(isLoading = false)}
-                _effect.emit(LoginUiEvent.NavigateToMain)
+                _effect.emit(LoginUiEvent.NavigateToRepos)
             }
             result.onFailure { exception ->
                 val errorText = when (exception) {
@@ -73,5 +74,9 @@ class LoginViewModel(
                 _uiState.update{it.copy(isLoading = false, error = errorText)}
             }
         }
+    }
+
+    fun cancelLoading() {
+        loadJob?.cancel()
     }
 }

@@ -1,4 +1,4 @@
-package com.github.rodionk77.common
+package com.github.rodionk77.common.Utils
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.StringResource

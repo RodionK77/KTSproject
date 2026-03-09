@@ -1,5 +1,5 @@
 <resources>
-    <string name="welcome">Добро пожаловать</string>
+    <string name="welcome">Добро пожаловать в GitHub Explorer</string>
     <string name="welcome_image">Приветственное изображение</string>
     <string name="show_image">Показать картинку</string>
     <string name="hide_image">Скрыть картинку</string>
@@ -14,4 +14,13 @@
     <string name="no_account">Ещё нет аккаунта?</string>
     <string name="register"> Зарегистрируйтесь</string>
     <string name="enter">Войти</string>
+    <string name="enter_github">Войти через GitHub</string>
+    <string name="unknown_server_answer">Неизвестный ответ от сервера</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="token_not_detected">Токен не найден, пожалуйста, авторизуйтесь</string>
+    <string name="users_repositories">Репозитории пользователя</string>
+    <string name="no_repositories">Репозитории отсутствуют</string>
+    <string name="error">Ошибка</string>
+    <string name="language">Язык</string>
+    <string name="avatar">Аватар пользователя</string>
 </resources>

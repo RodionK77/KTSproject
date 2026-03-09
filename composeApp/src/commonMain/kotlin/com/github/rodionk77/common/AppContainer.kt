@@ -2,6 +2,7 @@ package com.github.rodionk77.common
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.feature.login.data.AuthRepository
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
 import com.github.rodionk77.feature.repos.data.ReposRepository

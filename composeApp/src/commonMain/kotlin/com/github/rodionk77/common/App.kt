@@ -27,14 +27,19 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.Serializable
 
 @Serializable
-object WelcomeRoute
-@Serializable
-data class LoginRoute(val code: String? = null)
-@Serializable
-object ReposRoute
-@Serializable
-data class RepoDescriptionRoute(val repoName: String, val ownerLogin: String)
+sealed class Route {
+    @Serializable
+    data object Welcome : Route()
 
+    @Serializable
+    data class Login(val code: String? = null) : Route()
+
+    @Serializable
+    data object Repos : Route()
+
+    @Serializable
+    data class RepoDescription(val repoName: String, val ownerLogin: String) : Route()
+}
 
 @Composable
 @Preview
@@ -47,42 +52,29 @@ fun App() {
         Scaffold { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = WelcomeRoute,
+                startDestination = Route.Welcome,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                composable<WelcomeRoute> {
+                composable<Route.Welcome> {
                     WelcomeScreen(
                         onNavigateToLogin = {
-                            navController.navigate(LoginRoute()) {
-                                popUpTo(WelcomeRoute) { inclusive = false }
+                            navController.navigate(Route.Login()) {
+                                popUpTo(Route.Welcome) { inclusive = false }
                             }
                         }
                     )
                 }
-                composable<LoginRoute>(
+                composable<Route.Login>(
                     deepLinks = listOf(
-                        navDeepLink<LoginRoute>(basePath = "myapp://oauth2callback")
+                        navDeepLink<Route.Login>(basePath = "myapp://oauth2callback")
                     )
                 ) {
-                    val loginViewModel = viewModel {
-                        LoginViewModel(repository = authRepository, savedStateHandle = createSavedStateHandle())
-                    }
-
-                    LaunchedEffect(Unit) {
-                        DeepLinkManager.deepLinkEvent.collect { urlString ->
-                            if (urlString.startsWith("myapp://oauth2callback")) {
-                                val code = Url(urlString).parameters["code"]
-                                if (code != null) {
-                                    loginViewModel.handleOAuthCode(code)
-                                }
-                            }
-                        }
-                    }
-
                     LoginScreen(
-                        viewModel = loginViewModel,
+                        viewModel = viewModel {
+                            LoginViewModel(repository = authRepository, savedStateHandle = createSavedStateHandle())
+                        },
                         onNavigateToMain = {
-                            navController.navigate(ReposRoute) {
+                            navController.navigate(Route.Repos) {
                                 popUpTo(0) {
                                     inclusive = true
                                 }
@@ -91,25 +83,23 @@ fun App() {
                         }
                     )
                 }
-                composable<ReposRoute> {
-                    val reposViewModel = viewModel {
-                        ReposViewModel(repository = reposRepository)
-                    }
+                composable<Route.Repos> {
                     ReposScreen(
-                        viewModel = reposViewModel,
+                        viewModel = viewModel {
+                            ReposViewModel(repository = reposRepository)
+                        },
                         onNavigateToRepo = { repoName, ownerLogin ->
-                            navController.navigate(RepoDescriptionRoute(repoName, ownerLogin))
+                            navController.navigate(Route.RepoDescription(repoName, ownerLogin))
                         })
                 }
-                composable<RepoDescriptionRoute> {
-                    val repoDescriptionViewModel = viewModel {
-                        RepoDescriptionViewModel(
-                            repository = repoDescriptionRepository,
-                            savedStateHandle = createSavedStateHandle()
-                        )
-                    }
+                composable<Route.RepoDescription> {
                     RepoDescriptionScreen(
-                        viewModel = repoDescriptionViewModel,
+                        viewModel = viewModel {
+                            RepoDescriptionViewModel(
+                                repository = repoDescriptionRepository,
+                                savedStateHandle = createSavedStateHandle()
+                            )
+                        },
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
@@ -126,5 +116,3 @@ object DeepLinkManager {
         deepLinkEvent.tryEmit(url)
     }
 }
-
-//check

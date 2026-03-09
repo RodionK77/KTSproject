@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserEntity(
-    @SerialName("login") val login: String,
-    @SerialName("avatar_url") val avatarUrl: String? = null
+    @SerialName("login") val login: String = "...",
+    @SerialName("avatar_url") val avatarUrl: String = ""
 )

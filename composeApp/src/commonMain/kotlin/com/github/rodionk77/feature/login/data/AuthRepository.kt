@@ -1,9 +1,9 @@
 package com.github.rodionk77.feature.login.data
 
-import com.github.rodionk77.common.GitHubApiException
+import com.github.rodionk77.common.Utils.GitHubApiException
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Tokens
-import com.github.rodionk77.common.UnknownServerException
+import com.github.rodionk77.common.Utils.UnknownServerException
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -11,9 +11,6 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
-import ktsproject.composeapp.generated.resources.Res
-import ktsproject.composeapp.generated.resources.unknown_server_answer
-import org.jetbrains.compose.resources.getString
 
 class AuthRepository (
     private val httpClient: HttpClient,

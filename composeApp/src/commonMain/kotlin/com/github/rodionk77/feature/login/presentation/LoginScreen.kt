@@ -33,8 +33,9 @@ import coil3.compose.LocalPlatformContext
 import coil3.network.NetworkHeaders
 import coil3.network.httpHeaders
 import coil3.request.ImageRequest
+import com.github.rodionk77.common.DeepLinkManager
 import com.github.rodionk77.common.Tokens
-import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.broken_image_icon
 import ktsproject.composeapp.generated.resources.enter_github
@@ -56,7 +57,18 @@ fun LoginScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { event ->
             when (event) {
-                is LoginUiEvent.NavigateToMain -> onNavigateToMain()
+                is LoginUiEvent.NavigateToRepos -> onNavigateToMain()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        DeepLinkManager.deepLinkEvent.collect { urlString ->
+            if (urlString.startsWith("myapp://oauth2callback")) {
+                val code = Url(urlString).parameters["code"]
+                if (code != null) {
+                    viewModel.handleOAuthCode(code)
+                }
             }
         }
     }

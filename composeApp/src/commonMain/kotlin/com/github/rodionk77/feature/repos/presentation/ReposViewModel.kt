@@ -2,10 +2,11 @@ package com.github.rodionk77.feature.repos.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.rodionk77.common.TokenNotFoundException
-import com.github.rodionk77.common.UiText
+import com.github.rodionk77.common.Utils.TokenNotFoundException
+import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.feature.repos.data.ReposRepository
 import com.github.rodionk77.feature.repos.data.RepoEntity
+import com.github.rodionk77.feature.repos.data.UserEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -26,8 +27,7 @@ data class MainUiState(
     val isLoading: Boolean = true,
     val repos: List<RepoEntity> = emptyList(),
     val filteredRepos: List<RepoEntity> = emptyList(),
-    val username: String? = null,
-    val avatar: String? = null,
+    val user: UserEntity = UserEntity(),
     val error: UiText? = null,
     val isPaginating: Boolean = false, //состояние подгрузки
     val hasReachedEnd: Boolean = false, //останавливает запросы, когда сервер вернул пустой список
@@ -64,11 +64,11 @@ class ReposViewModel(
 
             if (profileResult.isSuccess && reposResult.isSuccess) {
                 val repos = reposResult.getOrNull() ?: emptyList()
+                val user = profileResult.getOrNull() ?: UserEntity()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        username = profileResult.getOrNull()?.login,
-                        avatar = profileResult.getOrNull()?.avatarUrl,
+                        user = user,
                         repos = repos,
                         filteredRepos = repos,
                         currentPage = 1,

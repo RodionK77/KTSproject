@@ -63,8 +63,6 @@ fun ReposScreen(viewModel: ReposViewModel, onNavigateToRepo: (repoName: String, 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
-    val username = uiState.username ?: "..."
-    val userAvatar = uiState.avatar ?: ""
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -79,7 +77,7 @@ fun ReposScreen(viewModel: ReposViewModel, onNavigateToRepo: (repoName: String, 
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "${stringResource(Res.string.users_repositories)} $username",
+            text = "${stringResource(Res.string.users_repositories)} ${uiState.user.login}",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
@@ -187,62 +185,6 @@ fun ReposScreen(viewModel: ReposViewModel, onNavigateToRepo: (repoName: String, 
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun RepoItem(repo: RepoEntity, avatar: String, onClick: () -> Unit) {
-    Card(
-        onClick =  onClick,
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = repo.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                if (!repo.description.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = repo.description,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-                if (!repo.language.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "${stringResource(Res.string.language)}: ${repo.language}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp)) //
-            AsyncImage(
-                model = avatar,
-                contentDescription = stringResource(Res.string.avatar),
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape),
-                error = painterResource(Res.drawable.broken_image_icon),
-                placeholder = painterResource(Res.drawable.hourglass_icon),
-                contentScale = ContentScale.Crop
-            )
         }
     }
 }

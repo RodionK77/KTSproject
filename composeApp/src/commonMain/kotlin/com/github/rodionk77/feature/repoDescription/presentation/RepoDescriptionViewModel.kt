@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.github.rodionk77.common.RepoDescriptionRoute
-import com.github.rodionk77.common.TokenNotFoundException
-import com.github.rodionk77.common.UiText
+import com.github.rodionk77.common.Route
+import com.github.rodionk77.common.Utils.TokenNotFoundException
+import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
 import kotlinx.coroutines.Job
@@ -33,8 +33,8 @@ class RepoDescriptionViewModel(
     private val _uiState = MutableStateFlow(RepoDescriptionUiState())
     val uiState: StateFlow<RepoDescriptionUiState> = _uiState.asStateFlow()
 
-    private val repoName: String = savedStateHandle.toRoute<RepoDescriptionRoute>().repoName
-    private val ownerLogin: String = savedStateHandle.toRoute<RepoDescriptionRoute>().ownerLogin
+    private val repoName: String = savedStateHandle.toRoute<Route.RepoDescription>().repoName
+    private val ownerLogin: String = savedStateHandle.toRoute<Route.RepoDescription>().ownerLogin
 
     private var loadJob: Job? = null
 

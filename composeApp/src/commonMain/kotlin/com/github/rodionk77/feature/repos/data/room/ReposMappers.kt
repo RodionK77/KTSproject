@@ -1,8 +1,8 @@
 package com.github.rodionk77.feature.repos.data.room
 
-import com.github.rodionk77.feature.repos.data.OwnerEntity
-import com.github.rodionk77.feature.repos.data.RepoEntity
-import com.github.rodionk77.feature.repos.data.UserEntity
+import com.github.rodionk77.common.models.OwnerEntity
+import com.github.rodionk77.common.models.RepoEntity
+import com.github.rodionk77.common.models.UserEntity
 
 fun RepoEntity.toDbEntity() = RepoDbEntity(
     id = id, name = name, description = description,

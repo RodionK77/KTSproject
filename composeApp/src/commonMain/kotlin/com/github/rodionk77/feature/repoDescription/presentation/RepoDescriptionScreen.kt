@@ -22,12 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.arrow_back_icon
 import ktsproject.composeapp.generated.resources.back_icon
+import ktsproject.composeapp.generated.resources.bookmark_icon
 import ktsproject.composeapp.generated.resources.created_at
 import ktsproject.composeapp.generated.resources.default_branch
 import ktsproject.composeapp.generated.resources.error
@@ -37,6 +39,7 @@ import ktsproject.composeapp.generated.resources.open_issues
 import ktsproject.composeapp.generated.resources.open_on_github
 import ktsproject.composeapp.generated.resources.private_repo
 import ktsproject.composeapp.generated.resources.public_repo
+import ktsproject.composeapp.generated.resources.bookmark_icon_desc
 import ktsproject.composeapp.generated.resources.retry
 import ktsproject.composeapp.generated.resources.stars
 import ktsproject.composeapp.generated.resources.updated_at
@@ -53,15 +56,35 @@ fun RepoDescriptionScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.padding(8.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painterResource(Res.drawable.arrow_back_icon),
-                contentDescription = stringResource(Res.string.back_icon),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    painterResource(Res.drawable.arrow_back_icon),
+                    contentDescription = stringResource(Res.string.back_icon),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (uiState.repo != null) {
+                IconButton(
+                    onClick = { viewModel.toggleFavorite() },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        painterResource(Res.drawable.bookmark_icon),
+                        contentDescription = stringResource(Res.string.bookmark_icon_desc),
+                        tint = if (uiState.isFavorited) MaterialTheme.colorScheme.primary
+                               else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = if (uiState.isFavorited) Modifier else Modifier.alpha(0.4f)
+                    )
+                }
+            }
         }
 
         when {

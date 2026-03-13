@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.github.rodionk77.common.Route
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
+import com.github.rodionk77.feature.favorites.data.FavoritesRepository
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
 import kotlinx.coroutines.Job
@@ -22,11 +23,13 @@ import ktsproject.composeapp.generated.resources.unknown_error
 data class RepoDescriptionUiState(
     val isLoading: Boolean = true,
     val repo: RepoDescriptionEntity? = null,
-    val error: UiText? = null
+    val error: UiText? = null,
+    val isFavorited: Boolean = false
 )
 
 class RepoDescriptionViewModel(
     private val repository: RepoDescriptionRepository,
+    private val favoritesRepository: FavoritesRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -50,10 +53,13 @@ class RepoDescriptionViewModel(
             val result = repository.getRepository(ownerLogin, repoName)
 
             if (result.isSuccess) {
+                val repo = result.getOrNull()
+                val isFavorited = repo?.let { favoritesRepository.isFavorite(it.id) } ?: false
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        repo = result.getOrNull()
+                        repo = repo,
+                        isFavorited = isFavorited
                     )
                 }
             } else {
@@ -70,5 +76,17 @@ class RepoDescriptionViewModel(
 
     fun retry() {
         loadData()
+    }
+
+    fun toggleFavorite() {
+        val repo = _uiState.value.repo ?: return
+        viewModelScope.launch {
+            if (_uiState.value.isFavorited) {
+                favoritesRepository.removeFavorite(repo.id)
+            } else {
+                favoritesRepository.addFavorite(repo)
+            }
+            _uiState.update { it.copy(isFavorited = !it.isFavorited) }
+        }
     }
 }

@@ -2,7 +2,7 @@ package com.github.rodionk77.feature.profile.data
 
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.database.AppDatabase
-import com.github.rodionk77.feature.repos.data.UserEntity
+import com.github.rodionk77.common.models.UserEntity
 import com.github.rodionk77.feature.repos.data.room.UserDao
 import com.github.rodionk77.feature.repos.data.room.toDbEntity
 import com.github.rodionk77.feature.repos.data.room.toDomainEntity

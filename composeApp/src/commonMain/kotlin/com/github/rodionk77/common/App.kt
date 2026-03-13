@@ -28,9 +28,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
 import com.github.rodionk77.common.AppContainer.authRepository
+import com.github.rodionk77.common.AppContainer.favoritesRepository
 import com.github.rodionk77.common.AppContainer.profileRepository
 import com.github.rodionk77.common.AppContainer.repoDescriptionRepository
 import com.github.rodionk77.common.AppContainer.reposRepository
+import com.github.rodionk77.feature.favorites.presentation.FavoritesScreen
+import com.github.rodionk77.feature.favorites.presentation.FavoritesViewModel
 import com.github.rodionk77.feature.login.presentation.LoginScreen
 import com.github.rodionk77.feature.login.presentation.LoginViewModel
 import com.github.rodionk77.feature.login.presentation.WelcomeScreen
@@ -45,6 +48,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.serialization.Serializable
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.account_circle_icon
+import ktsproject.composeapp.generated.resources.bookmark_icon
+import ktsproject.composeapp.generated.resources.favorites
 import ktsproject.composeapp.generated.resources.profile
 import ktsproject.composeapp.generated.resources.repositories
 import ktsproject.composeapp.generated.resources.stacks_icon
@@ -67,6 +72,9 @@ sealed class Route {
 
     @Serializable
     data object Profile : Route()
+
+    @Serializable
+    data object Favorites : Route()
 }
 
 @Composable
@@ -153,10 +161,21 @@ fun App() {
                         viewModel = viewModel {
                             RepoDescriptionViewModel(
                                 repository = repoDescriptionRepository,
+                                favoritesRepository = favoritesRepository,
                                 savedStateHandle = createSavedStateHandle()
                             )
                         },
                         onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+                composable<Route.Favorites> {
+                    FavoritesScreen(
+                        viewModel = viewModel {
+                            FavoritesViewModel(repository = favoritesRepository)
+                        },
+                        onNavigateToRepo = { repoName, ownerLogin ->
+                            navController.navigate(Route.RepoDescription(repoName, ownerLogin))
+                        }
                     )
                 }
                 composable<Route.Profile> {
@@ -195,6 +214,7 @@ fun BottomBar(showBottomBar: Boolean, navController: NavHostController) {
 
         val isReposSelected = currentRoute?.contains("Repos") == true &&
                 !currentRoute.contains("RepoDescription")
+        val isFavoritesSelected = currentRoute?.contains("Favorites") == true
         val isProfileSelected = currentRoute?.contains("Profile") == true
 
         NavigationBar(
@@ -224,6 +244,24 @@ fun BottomBar(showBottomBar: Boolean, navController: NavHostController) {
                     )
                 },
                 label = { Text(stringResource(Res.string.repositories)) }
+            )
+            NavigationBarItem(
+                selected = isFavoritesSelected,
+                onClick = {
+                    if (!isFavoritesSelected) {
+                        navController.navigate(Route.Favorites) {
+                            popUpTo(Route.Repos) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                icon = {
+                    Icon(
+                        painterResource(Res.drawable.bookmark_icon),
+                        contentDescription = stringResource(Res.string.favorites)
+                    )
+                },
+                label = { Text(stringResource(Res.string.favorites)) }
             )
             NavigationBarItem(
                 selected = isProfileSelected,

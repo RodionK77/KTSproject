@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.feature.repos.data.ReposRepository
-import com.github.rodionk77.feature.repos.data.RepoEntity
-import com.github.rodionk77.feature.repos.data.UserEntity
+import com.github.rodionk77.common.models.RepoEntity
+import com.github.rodionk77.common.models.UserEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
-import ktsproject.composeapp.generated.resources.token_not_detected
 import ktsproject.composeapp.generated.resources.unknown_error
 
 data class MainUiState(

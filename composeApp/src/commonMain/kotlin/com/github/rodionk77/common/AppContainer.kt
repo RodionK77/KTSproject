@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.database.AppDatabase
+import com.github.rodionk77.feature.favorites.data.FavoritesRepository
 import com.github.rodionk77.feature.login.data.AuthRepository
 import com.github.rodionk77.feature.profile.data.ProfileRepository
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
@@ -101,6 +102,10 @@ object AppContainer {
 
     val repoDescriptionRepository: RepoDescriptionRepository by lazy {
         RepoDescriptionRepository(httpClient, database.repoDescriptionDao())
+    }
+
+    val favoritesRepository: FavoritesRepository by lazy {
+        FavoritesRepository(database.favoriteDao())
     }
 
     val profileRepository: ProfileRepository by lazy {

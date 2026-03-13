@@ -46,4 +46,7 @@
     <string name="followers">Подписчики</string>
     <string name="following">Подписки</string>
     <string name="member_since">Зарегестрирован</string>
+    <string name="favorites">Избранное</string>
+    <string name="bookmark_icon_desc">Значок закладки</string>
+    <string name="no_favorites">Нет избранных репозиториев</string>
 </resources>

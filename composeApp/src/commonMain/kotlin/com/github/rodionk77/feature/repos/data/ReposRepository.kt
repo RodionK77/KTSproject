@@ -1,5 +1,7 @@
 package com.github.rodionk77.feature.repos.data
 
+import com.github.rodionk77.common.models.RepoEntity
+import com.github.rodionk77.common.models.UserEntity
 import com.github.rodionk77.feature.repos.data.room.ReposDao
 import com.github.rodionk77.feature.repos.data.room.UserDao
 import com.github.rodionk77.feature.repos.data.room.toDbEntity

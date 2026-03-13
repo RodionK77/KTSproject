@@ -61,7 +61,6 @@ class LoginViewModel(
             val result = repository.exchangeCodeForToken(code)
 
             result.onSuccess { token ->
-                repository.saveToken(token)
                 _uiState.update{it.copy(isLoading = false)}
                 _effect.emit(LoginUiEvent.NavigateToRepos)
             }

@@ -73,7 +73,7 @@ fun RepoDescriptionScreen(
 
             uiState.error != null -> {
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {

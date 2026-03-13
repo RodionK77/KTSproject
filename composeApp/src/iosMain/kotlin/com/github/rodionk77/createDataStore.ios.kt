@@ -10,7 +10,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-@OptIn(ExperimentalForeignApi::class)
+/*@OptIn(ExperimentalForeignApi::class)
 fun createDataStore(): DataStore<Preferences> {
     return createDataStore(
         producePath = {
@@ -24,4 +24,4 @@ fun createDataStore(): DataStore<Preferences> {
             requireNotNull(documentDirectory).path + "/$DATA_STORE_FILE_NAME"
         }
     )
-}
+}*/

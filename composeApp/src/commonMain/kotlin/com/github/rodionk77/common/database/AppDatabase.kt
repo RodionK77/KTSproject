@@ -16,7 +16,7 @@ import com.github.rodionk77.feature.repos.data.room.UserDbEntity
 
 @Database(
     entities = [RepoDbEntity::class, UserDbEntity::class, RepoDescriptionDbEntity::class, FavoriteDbEntity::class],
-    version = 2
+    version = 3
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {

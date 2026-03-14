@@ -225,7 +225,7 @@ fun BottomBar(showBottomBar: Boolean, navController: NavHostController) {
                 onClick = {
                     if (!isReposSelected) {
                         navController.navigate(Route.Repos) {
-                            popUpTo(Route.Repos) { inclusive = true }
+                            popUpTo(Route.Repos) { inclusive = false }
                             launchSingleTop = true
                         }
                         /*navController.navigate(Route.Repos) {

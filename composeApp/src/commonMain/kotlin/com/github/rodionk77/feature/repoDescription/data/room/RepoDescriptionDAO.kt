@@ -12,6 +12,9 @@ interface RepoDescriptionDao {
     @Upsert
     suspend fun upsert(repo: RepoDescriptionDbEntity)
 
+    @Query("UPDATE repo_descriptions SET readmeContent = :content WHERE name = :repoName AND ownerLogin = :ownerLogin")
+    suspend fun updateReadme(repoName: String, ownerLogin: String, content: String)
+
     @Query("DELETE FROM repo_descriptions")
     suspend fun clearAll()
 }

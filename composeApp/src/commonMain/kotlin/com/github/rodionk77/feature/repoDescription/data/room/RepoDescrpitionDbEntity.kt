@@ -19,5 +19,6 @@ data class RepoDescriptionDbEntity(
     val createdAt: String?,
     val isPrivate: Boolean,
     val ownerLogin: String,
-    val ownerAvatarUrl: String?
+    val ownerAvatarUrl: String?,
+    val readmeContent: String? = null
 )

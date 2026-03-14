@@ -10,7 +10,10 @@ import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.feature.favorites.data.FavoritesRepository
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +27,8 @@ data class RepoDescriptionUiState(
     val isLoading: Boolean = true,
     val repo: RepoDescriptionEntity? = null,
     val error: UiText? = null,
-    val isFavorited: Boolean = false
+    val isFavorited: Boolean = false,
+    val readme: String? = null
 )
 
 class RepoDescriptionViewModel(
@@ -50,26 +54,37 @@ class RepoDescriptionViewModel(
         loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val result = repository.getRepository(ownerLogin, repoName)
+            coroutineScope {
+                val repoDeferred = async { repository.getRepository(ownerLogin, repoName) }
+                val readmeDeferred = async { repository.getReadme(ownerLogin, repoName) }
 
-            if (result.isSuccess) {
-                val repo = result.getOrNull()
-                val isFavorited = repo?.let { favoritesRepository.isFavorite(it.id) } ?: false
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        repo = repo,
-                        isFavorited = isFavorited
-                    )
+                val result = repoDeferred.await()
+                val readme = readmeDeferred.await().getOrNull()
+
+                if (result.isSuccess && readme != null) {
+                    repository.saveReadme(ownerLogin, repoName, readme)
                 }
-            } else {
-                val exception = result.exceptionOrNull()
-                val errorText = when (exception) {
-                    is TokenNotFoundException -> UiText.StringRes(Res.string.token_not_detected)
-                    else -> exception?.message?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringRes(Res.string.unknown_error)
+
+                if (result.isSuccess) {
+                    val repo = result.getOrNull()
+                    val isFavorited = repo?.let { favoritesRepository.isFavorite(it.id) } ?: false
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            repo = repo,
+                            isFavorited = isFavorited,
+                            readme = readme
+                        )
+                    }
+                } else {
+                    val exception = result.exceptionOrNull()
+                    val errorText = when (exception) {
+                        is TokenNotFoundException -> UiText.StringRes(Res.string.token_not_detected)
+                        else -> exception?.message?.let { UiText.DynamicString(it) }
+                            ?: UiText.StringRes(Res.string.unknown_error)
+                    }
+                    _uiState.update { it.copy(isLoading = false, error = errorText) }
                 }
-                _uiState.update { it.copy(isLoading = false, error = errorText) }
             }
         }
     }

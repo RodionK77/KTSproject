@@ -57,6 +57,9 @@ kotlin {
             implementation(libs.kvault.datastore)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.multiplatform.markdown.renderer)
+            implementation(libs.multiplatform.markdown.renderer.m3)
+            implementation(libs.multiplatform.markdown.renderer.coil3)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

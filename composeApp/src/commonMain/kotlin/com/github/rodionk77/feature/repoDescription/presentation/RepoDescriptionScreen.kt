@@ -45,8 +45,33 @@ import ktsproject.composeapp.generated.resources.stars
 import ktsproject.composeapp.generated.resources.updated_at
 import ktsproject.composeapp.generated.resources.visibility
 import ktsproject.composeapp.generated.resources.watchers
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.rememberAsyncImagePainter
+import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.model.ImageData
+import com.mikepenz.markdown.model.ImageTransformer
+import ktsproject.composeapp.generated.resources.broken_image_icon
+import ktsproject.composeapp.generated.resources.hourglass_icon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+
+private object ReadmeImageTransformer : ImageTransformer by Coil3ImageTransformerImpl {
+    @Composable
+    override fun transform(link: String): ImageData {
+        val painter = rememberAsyncImagePainter(
+            model = link,
+            placeholder = painterResource(Res.drawable.hourglass_icon),
+            error = painterResource(Res.drawable.broken_image_icon),
+            contentScale = ContentScale.FillWidth
+        )
+        return ImageData(
+            painter = painter,
+            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.FillWidth
+        )
+    }
+}
 
 @Composable
 fun RepoDescriptionScreen(
@@ -162,6 +187,14 @@ fun RepoDescriptionScreen(
                         value = if (repo.private) stringResource(Res.string.private_repo)
                         else stringResource(Res.string.public_repo)
                     )
+
+                    if (!uiState.readme.isNullOrBlank()) {
+                        HorizontalDivider()
+                        Markdown(
+                            content = uiState.readme!!,
+                            imageTransformer = ReadmeImageTransformer
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 

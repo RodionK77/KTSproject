@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
+import ktsproject.composeapp.generated.resources.no_internet
 import ktsproject.composeapp.generated.resources.unknown_error
 import ktsproject.composeapp.generated.resources.unknown_server_answer
 
@@ -65,10 +66,14 @@ class LoginViewModel(
                 _effect.emit(LoginUiEvent.NavigateToRepos)
             }
             result.onFailure { exception ->
-                val errorText = when (exception) {
-                    is UnknownServerException -> UiText.StringRes(Res.string.unknown_server_answer)
-                    else -> exception.message?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringRes(Res.string.unknown_error)
+                val errorText = when {
+                    exception is UnknownServerException -> UiText.StringRes(Res.string.unknown_server_answer)
+                    exception.message?.contains("UnknownHostException") == true ||
+                            exception.message?.contains("Unable to resolve host") == true ||
+                            exception.message?.contains("The Internet connection appears to be offline") == true ||
+                            exception.message?.contains("Network is unreachable") == true ->
+                        UiText.StringRes(Res.string.no_internet)
+                    else -> UiText.StringRes(Res.string.unknown_error)
                 }
                 _uiState.update{it.copy(isLoading = false, error = errorText)}
             }

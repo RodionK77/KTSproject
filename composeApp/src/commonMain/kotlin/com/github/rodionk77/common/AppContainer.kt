@@ -39,7 +39,7 @@ object AppContainer {
 
     lateinit var database: AppDatabase
 
-    lateinit var kVault: KVault  // ← вместо dataStore
+    lateinit var kVault: KVault
 
     val tokenStorage: TokenStorage by lazy {
         TokenStorage(kVault)

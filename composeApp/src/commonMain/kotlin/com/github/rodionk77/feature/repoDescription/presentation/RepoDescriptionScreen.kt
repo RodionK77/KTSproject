@@ -1,7 +1,6 @@
 package com.github.rodionk77.feature.repoDescription.presentation
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -9,24 +8,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,7 +60,6 @@ import ktsproject.composeapp.generated.resources.forks
 import ktsproject.composeapp.generated.resources.hourglass_icon
 import ktsproject.composeapp.generated.resources.language
 import ktsproject.composeapp.generated.resources.open_issues
-import ktsproject.composeapp.generated.resources.open_on_github
 import ktsproject.composeapp.generated.resources.private_repo
 import ktsproject.composeapp.generated.resources.public_repo
 import ktsproject.composeapp.generated.resources.bookmark_icon_desc
@@ -68,6 +69,14 @@ import ktsproject.composeapp.generated.resources.updated_at
 import ktsproject.composeapp.generated.resources.visibility
 import ktsproject.composeapp.generated.resources.watchers
 import ktsproject.composeapp.generated.resources.сlose_image_desc
+import ktsproject.composeapp.generated.resources.cancel
+import ktsproject.composeapp.generated.resources.create_btn
+import ktsproject.composeapp.generated.resources.create_issue
+import ktsproject.composeapp.generated.resources.create_issue_desc
+import ktsproject.composeapp.generated.resources.issue_body
+import ktsproject.composeapp.generated.resources.issue_created_success
+import ktsproject.composeapp.generated.resources.issue_title
+import ktsproject.composeapp.generated.resources.report_icon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -98,6 +107,7 @@ fun RepoDescriptionScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedImageUrl by remember { mutableStateOf<String?>(null) }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -122,9 +132,9 @@ fun RepoDescriptionScreen(
                     Icon(
                         painterResource(Res.drawable.bookmark_icon),
                         contentDescription = stringResource(Res.string.bookmark_icon_desc),
-                        tint = if (uiState.isFavorited) MaterialTheme.colorScheme.primary
+                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary
                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = if (uiState.isFavorited) Modifier else Modifier.alpha(0.4f)
+                        modifier = if (uiState.isFavorite) Modifier else Modifier.alpha(0.4f)
                     )
                 }
             }
@@ -218,6 +228,26 @@ fun RepoDescriptionScreen(
             }
         }
     }
+    if (uiState.repo != null) {
+        FloatingActionButton(
+            onClick = { viewModel.showCreateIssueDialog() },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+        ) {
+            Icon(
+                painterResource(Res.drawable.report_icon),
+                contentDescription = stringResource(Res.string.create_issue_desc)
+            )
+        }
+    }
+    } // end Box
+
+    if (uiState.showCreateIssueDialog) {
+        CreateIssueDialog(
+            status = uiState.issueCreationStatus,
+            onDismiss = { viewModel.dismissCreateIssueDialog() },
+            onConfirm = { t, b -> viewModel.createIssue(t, b) }
+        )
+    }
 
     selectedImageUrl?.let { url ->
         FullscreenImageViewer(
@@ -225,6 +255,81 @@ fun RepoDescriptionScreen(
             onDismiss = { selectedImageUrl = null }
         )
     }
+}
+
+@Composable
+private fun CreateIssueDialog(
+    status: IssueCreationStatus,
+    onDismiss: () -> Unit,
+    onConfirm: (title: String, body: String) -> Unit
+) {
+    var title by rememberSaveable { mutableStateOf("") }
+    var issueBody by rememberSaveable { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = { if (status !is IssueCreationStatus.Sending) onDismiss() },
+        title = { Text(stringResource(Res.string.create_issue)) },
+        text = {
+            when (status) {
+                is IssueCreationStatus.Success -> {
+                    Text(
+                        stringResource(Res.string.issue_created_success),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                else -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = { Text(stringResource(Res.string.issue_title)) },
+                        singleLine = true,
+                        enabled = status !is IssueCreationStatus.Sending,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = issueBody,
+                        onValueChange = { issueBody = it },
+                        label = { Text(stringResource(Res.string.issue_body)) },
+                        minLines = 3,
+                        enabled = status !is IssueCreationStatus.Sending,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (status is IssueCreationStatus.Error) {
+                        Text(
+                            text = status.message.asString(),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    if (status is IssueCreationStatus.Sending) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (status is IssueCreationStatus.Success) {
+                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) }
+            } else {
+                TextButton(
+                    onClick = { onConfirm(title, issueBody) },
+                    enabled = title.isNotBlank() && status !is IssueCreationStatus.Sending
+                ) {
+                    Text(stringResource(Res.string.create_btn))
+                }
+            }
+        },
+        dismissButton = {
+            if (status !is IssueCreationStatus.Success) {
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = status !is IssueCreationStatus.Sending
+                ) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            }
+        }
+    )
 }
 
 @Composable

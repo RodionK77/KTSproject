@@ -37,7 +37,6 @@ class ReposRepository(
                 }
             } else {
                 Result.failure(e)
-                //Result.success(emptyList())
             }
         }
     }

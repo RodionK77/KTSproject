@@ -3,10 +3,15 @@ package com.github.rodionk77.feature.repoDescription.data
 import com.github.rodionk77.feature.repoDescription.data.room.RepoDescriptionDao
 import com.github.rodionk77.feature.repoDescription.data.room.toDbEntity
 import com.github.rodionk77.feature.repoDescription.data.room.toDomainEntity
+import com.github.rodionk77.common.Utils.HttpException
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -47,6 +52,21 @@ class RepoDescriptionRepository (
 
     suspend fun saveReadme(ownerLogin: String, repoName: String, content: String) {
         repoDescriptionDao.updateReadme(repoName, ownerLogin, content)
+    }
+
+    suspend fun createIssue(ownerLogin: String, repoName: String, title: String, body: String): Result<Unit> {
+        return try {
+            val response = httpClient.post("repos/$ownerLogin/$repoName/issues") {
+                contentType(ContentType.Application.Json)
+                setBody(CreateIssueRequest(title, body))
+            }
+            if (response.status.value !in 200..299) {
+                throw HttpException(response.status.value)
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     private fun preprocessMarkdown(markdown: String, baseUrl: String?): String {

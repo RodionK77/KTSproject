@@ -79,7 +79,7 @@ fun ReposScreen(
                     snackbarHostState.showSnackbar(successMessage)
                 }
                 is MainUiEvent.RefreshError -> {
-                    snackbarHostState.showSnackbar(event.message.toString())
+                    snackbarHostState.showSnackbar(event.message.asSuspendString())
                 }
             }
         }

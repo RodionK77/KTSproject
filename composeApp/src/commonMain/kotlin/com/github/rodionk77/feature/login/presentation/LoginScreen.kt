@@ -74,9 +74,9 @@ fun LoginScreen(
     }
 
     val launchGitHubAuth = {
-        val redirectUri = "myapp://oauth2callback"
-        val authUrl = "https://github.com/login/oauth/authorize?client_id=${Tokens.GITHUB_CLIENT_ID}&redirect_uri=$redirectUri&scope=repo,user"
-
+        //val redirectUri = "myapp://oauth2callback"
+        //val authUrl = "https://github.com/login/oauth/authorize?client_id=${Tokens.GITHUB_CLIENT_ID}&redirect_uri=$redirectUri&scope=repo,user"
+        val authUrl = "https://github.com/apps/${Tokens.GITHUB_APP_SLUG}/installations/new"
         uriHandler.openUri(authUrl)
     }
 

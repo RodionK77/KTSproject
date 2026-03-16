@@ -29,3 +29,10 @@ data class OwnerEntity(
     @SerialName("login") val login: String,
     @SerialName("avatar_url") val avatarUrl: String? = null
 )
+
+@Serializable
+data class CreateIssueRequest(
+    @SerialName("title") val title: String,
+    @SerialName("body") val body: String
+)
+

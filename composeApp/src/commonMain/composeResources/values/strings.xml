@@ -50,4 +50,18 @@
     <string name="bookmark_icon_desc">Значок закладки</string>
     <string name="no_favorites">Нет избранных репозиториев</string>
     <string name="сlose_image_desc">Закрыть картинку</string>
+    <string name="no_internet">Проблемы с подключением к сети</string>
+    <string name="issue_error_400">Некорректный запрос</string>
+    <string name="issue_error_403">Нет доступа к репозиторию</string>
+    <string name="issue_error_404">Репозиторий не найден</string>
+    <string name="issue_error_410">Создание issues отключено в репозитории</string>
+    <string name="issue_error_422">Ошибка валидации или превышен лимит запросов</string>
+    <string name="issue_error_503">Сервис временно недоступен</string>
+    <string name="create_issue">Создать Issue</string>
+    <string name="issue_title">Заголовок</string>
+    <string name="issue_body">Описание</string>
+    <string name="create_btn">Создать</string>
+    <string name="cancel">Отмена</string>
+    <string name="issue_created_success">Issue успешно создан!</string>
+    <string name="create_issue_desc">Создать новый Issue</string>
 </resources>

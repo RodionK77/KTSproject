@@ -1,5 +1,10 @@
 package com.github.rodionk77.feature.repoDescription.presentation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,20 +25,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import coil3.compose.rememberAsyncImagePainter
+import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
+import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.model.ImageData
+import com.mikepenz.markdown.model.ImageTransformer
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.arrow_back_icon
 import ktsproject.composeapp.generated.resources.back_icon
 import ktsproject.composeapp.generated.resources.bookmark_icon
+import ktsproject.composeapp.generated.resources.broken_image_icon
+import ktsproject.composeapp.generated.resources.clear_icon
 import ktsproject.composeapp.generated.resources.created_at
 import ktsproject.composeapp.generated.resources.default_branch
 import ktsproject.composeapp.generated.resources.error
 import ktsproject.composeapp.generated.resources.forks
+import ktsproject.composeapp.generated.resources.hourglass_icon
 import ktsproject.composeapp.generated.resources.language
 import ktsproject.composeapp.generated.resources.open_issues
 import ktsproject.composeapp.generated.resources.open_on_github
@@ -45,18 +67,13 @@ import ktsproject.composeapp.generated.resources.stars
 import ktsproject.composeapp.generated.resources.updated_at
 import ktsproject.composeapp.generated.resources.visibility
 import ktsproject.composeapp.generated.resources.watchers
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.rememberAsyncImagePainter
-import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
-import com.mikepenz.markdown.m3.Markdown
-import com.mikepenz.markdown.model.ImageData
-import com.mikepenz.markdown.model.ImageTransformer
-import ktsproject.composeapp.generated.resources.broken_image_icon
-import ktsproject.composeapp.generated.resources.hourglass_icon
+import ktsproject.composeapp.generated.resources.сlose_image_desc
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private object ReadmeImageTransformer : ImageTransformer by Coil3ImageTransformerImpl {
+private class ReadmeImageTransformer(
+    private val onImageClick: (String) -> Unit
+) : ImageTransformer by Coil3ImageTransformerImpl {
     @Composable
     override fun transform(link: String): ImageData {
         val painter = rememberAsyncImagePainter(
@@ -67,7 +84,7 @@ private object ReadmeImageTransformer : ImageTransformer by Coil3ImageTransforme
         )
         return ImageData(
             painter = painter,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().clickable { onImageClick(link) },
             contentScale = ContentScale.FillWidth
         )
     }
@@ -79,6 +96,7 @@ fun RepoDescriptionScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var selectedImageUrl by remember { mutableStateOf<String?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -192,21 +210,20 @@ fun RepoDescriptionScreen(
                         HorizontalDivider()
                         Markdown(
                             content = uiState.readme!!,
-                            imageTransformer = ReadmeImageTransformer
+                            imageTransformer = remember { ReadmeImageTransformer { url -> selectedImageUrl = url } }
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Button(
-                        onClick = { /*  */ },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(Res.string.open_on_github))
-                    }
                 }
             }
         }
+    }
+
+    selectedImageUrl?.let { url ->
+        FullscreenImageViewer(
+            imageUrl = url,
+            onDismiss = { selectedImageUrl = null }
+        )
     }
 }
 
@@ -226,5 +243,64 @@ private fun RepoInfoRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium
         )
+    }
+}
+
+@Composable
+private fun FullscreenImageViewer(imageUrl: String, onDismiss: () -> Unit) {
+    var scale by remember { mutableStateOf(1f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
+
+    val transformableState = rememberTransformableState { zoomChange, panChange, _ ->
+        scale = (scale * zoomChange).coerceIn(1f, 5f)
+        offsetX += panChange.x
+        offsetY += panChange.y
+    }
+
+    Dialog(
+        onDismissRequest = {
+            scale = 1f
+            offsetX = 0f
+            offsetY = 0f
+            onDismiss()
+        },
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+                .clickable { onDismiss() },
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        translationX = offsetX,
+                        translationY = offsetY
+                    )
+                    .transformable(state = transformableState)
+                    .clickable { onDismiss() },
+                contentScale = ContentScale.Fit
+            )
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    painterResource(Res.drawable.clear_icon),
+                    contentDescription = stringResource(Res.string.сlose_image_desc),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
     }
 }

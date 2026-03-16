@@ -49,4 +49,5 @@
     <string name="favorites">Избранное</string>
     <string name="bookmark_icon_desc">Значок закладки</string>
     <string name="no_favorites">Нет избранных репозиториев</string>
+    <string name="сlose_image_desc">Закрыть картинку</string>
 </resources>

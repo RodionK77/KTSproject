@@ -1,14 +1,22 @@
 package com.github.rodionk77.feature.repos.data
 
+import com.github.rodionk77.common.models.RepoEntity
+import com.github.rodionk77.common.models.UserEntity
+import com.github.rodionk77.feature.repos.data.room.ReposDao
+import com.github.rodionk77.feature.repos.data.room.UserDao
+import com.github.rodionk77.feature.repos.data.room.toDbEntity
+import com.github.rodionk77.feature.repos.data.room.toDomainEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 class ReposRepository(
     private val httpClient: HttpClient,
+    private val reposDao: ReposDao,
+    private val userDao: UserDao
 )  {
 
-    suspend fun getRepositories(page: Int, perPage: Int = 20): Result<List<RepoEntity>> {
+    suspend fun getRepositories(page: Int, perPage: Int = 20, useCache: Boolean = true): Result<List<RepoEntity>> {
         return try {
             val response = httpClient.get("user/repos") {
                 url {
@@ -17,9 +25,19 @@ class ReposRepository(
                 }
             }
             val repos: List<RepoEntity> = response.body()
+            reposDao.upsertAll(repos.map { it.toDbEntity() })
             Result.success(repos)
         } catch (e: Exception) {
-            Result.failure(e)
+            if (useCache && page == 1) {
+                val cached = reposDao.getAll()
+                if (cached.isNotEmpty()) {
+                    Result.success(cached.map { it.toDomainEntity() })
+                } else {
+                    Result.failure(e)
+                }
+            } else {
+                Result.failure(e)
+            }
         }
     }
 
@@ -27,9 +45,15 @@ class ReposRepository(
         return try {
             val response = httpClient.get("user")
             val user: UserEntity = response.body()
+            userDao.upsertUser(user.toDbEntity())
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            val cached = userDao.getUser()
+            if (cached != null) {
+                Result.success(cached.toDomainEntity())
+            } else {
+                Result.failure(e)
+            }
         }
     }
 }

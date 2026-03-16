@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repos.presentation
+package com.github.rodionk77.common.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,7 +21,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.github.rodionk77.feature.repos.data.RepoEntity
+import com.github.rodionk77.common.models.RepoEntity
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.avatar
 import ktsproject.composeapp.generated.resources.broken_image_icon

@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repos.data
+package com.github.rodionk77.common.models
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName

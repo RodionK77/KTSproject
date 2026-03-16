@@ -11,6 +11,8 @@ class GitHubApiException(message: String) : Exception(message)
 
 class TokenNotFoundException : Exception()
 
+class HttpException(val code: Int) : Exception("HTTP $code")
+
 
 sealed interface UiText {
     data class DynamicString(val value: String) : UiText

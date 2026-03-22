@@ -76,6 +76,9 @@ import ktsproject.composeapp.generated.resources.create_issue_desc
 import ktsproject.composeapp.generated.resources.issue_body
 import ktsproject.composeapp.generated.resources.issue_created_success
 import ktsproject.composeapp.generated.resources.issue_title
+import ktsproject.composeapp.generated.resources.file_icon
+import ktsproject.composeapp.generated.resources.file_icon_desc
+import ktsproject.composeapp.generated.resources.folder_icon
 import ktsproject.composeapp.generated.resources.report_icon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -102,7 +105,8 @@ private class ReadmeImageTransformer(
 @Composable
 fun RepoDescriptionScreen(
     viewModel: RepoDescriptionViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToFiles: (repoName: String, ownerLogin: String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var selectedImageUrl by remember { mutableStateOf<String?>(null) }
@@ -125,17 +129,30 @@ fun RepoDescriptionScreen(
                 )
             }
             if (uiState.repo != null) {
-                IconButton(
-                    onClick = { viewModel.toggleFavorite() },
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Icon(
-                        painterResource(Res.drawable.bookmark_icon),
-                        contentDescription = stringResource(Res.string.bookmark_icon_desc),
-                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary
-                               else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = if (uiState.isFavorite) Modifier else Modifier.alpha(0.4f)
-                    )
+                val repo = uiState.repo!!
+                Row {
+                    IconButton(
+                        onClick = { onNavigateToFiles(repo.name, repo.owner.login) },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.folder_icon),
+                            contentDescription = stringResource(Res.string.file_icon_desc),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(
+                        onClick = { viewModel.toggleFavorite() },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            painterResource(Res.drawable.bookmark_icon),
+                            contentDescription = stringResource(Res.string.bookmark_icon_desc),
+                            tint = if (uiState.isFavorite) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = if (uiState.isFavorite) Modifier else Modifier.alpha(0.4f)
+                        )
+                    }
                 }
             }
         }
@@ -239,7 +256,7 @@ fun RepoDescriptionScreen(
             )
         }
     }
-    } // end Box
+    }
 
     if (uiState.showCreateIssueDialog) {
         CreateIssueDialog(

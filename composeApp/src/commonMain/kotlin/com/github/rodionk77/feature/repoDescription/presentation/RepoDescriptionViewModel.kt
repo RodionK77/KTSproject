@@ -8,9 +8,9 @@ import com.github.rodionk77.common.Route
 import com.github.rodionk77.common.Utils.HttpException
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
-import com.github.rodionk77.feature.favorites.data.FavoritesRepository
+import com.github.rodionk77.feature.favorites.domain.FavoritesRepository
 import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
-import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepository
+import com.github.rodionk77.feature.repoDescription.domain.RepoDescriptionRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

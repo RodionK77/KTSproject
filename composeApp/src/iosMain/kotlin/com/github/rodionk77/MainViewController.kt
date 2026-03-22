@@ -2,12 +2,19 @@ package com.github.rodionk77
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.github.rodionk77.common.App
-import com.github.rodionk77.common.AppContainer
-import com.github.rodionk77.common.database.getRoomDatabase
-import com.liftric.kvault.KVault
+import com.github.rodionk77.di.iosPlatformModule
+import com.github.rodionk77.di.networkModule
+import com.github.rodionk77.di.repositoryModule
+import com.github.rodionk77.di.viewModelModule
+import io.github.aakira.napier.DebugAntilog
+import io.github.aakira.napier.Napier
+import org.koin.compose.KoinApplication
 
-fun MainViewController() = ComposeUIViewController { App() }.also {
-    //AppContainer.dataStore = createDataStore()
-    AppContainer.kVault = KVault()
-    AppContainer.database = getRoomDatabase(getDatabaseBuilder())
+fun MainViewController() = ComposeUIViewController {
+    Napier.base(DebugAntilog())
+    KoinApplication(application = {
+        modules(iosPlatformModule, networkModule, repositoryModule, viewModelModule)
+    }) {
+        App()
+    }
 }

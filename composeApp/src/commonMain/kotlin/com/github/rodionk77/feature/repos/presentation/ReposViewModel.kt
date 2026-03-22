@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.common.Utils.UnknownServerException
-import com.github.rodionk77.feature.repos.data.ReposRepository
+import com.github.rodionk77.feature.repos.domain.ReposRepository
 import com.github.rodionk77.common.models.RepoEntity
 import com.github.rodionk77.common.models.UserEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi

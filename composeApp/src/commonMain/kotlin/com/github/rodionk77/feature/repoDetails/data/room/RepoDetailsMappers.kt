@@ -1,9 +1,9 @@
-package com.github.rodionk77.feature.repoDescription.data.room
+package com.github.rodionk77.feature.repoDetails.data.room
 
-import com.github.rodionk77.feature.repoDescription.data.OwnerEntity
-import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
+import com.github.rodionk77.feature.repoDetails.data.OwnerEntity
+import com.github.rodionk77.feature.repoDetails.data.RepoDetailsEntity
 
-fun RepoDescriptionEntity.toDbEntity() = RepoDescriptionDbEntity(
+fun RepoDetailsEntity.toDbEntity() = RepoDescriptionDbEntity(
     id = id, name = name, description = description, htmlUrl = htmlUrl,
     language = language, stargazersCount = stargazersCount, forksCount = forksCount,
     openIssuesCount = openIssuesCount, watchersCount = watchersCount,
@@ -11,7 +11,7 @@ fun RepoDescriptionEntity.toDbEntity() = RepoDescriptionDbEntity(
     isPrivate = private, ownerLogin = owner.login, ownerAvatarUrl = owner.avatarUrl
 )
 
-fun RepoDescriptionDbEntity.toDomainEntity() = RepoDescriptionEntity(
+fun RepoDescriptionDbEntity.toDomainEntity() = RepoDetailsEntity(
     id = id, name = name, description = description, htmlUrl = htmlUrl,
     language = language, stargazersCount = stargazersCount, forksCount = forksCount,
     openIssuesCount = openIssuesCount, watchersCount = watchersCount,

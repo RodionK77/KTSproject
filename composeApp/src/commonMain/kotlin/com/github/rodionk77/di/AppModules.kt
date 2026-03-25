@@ -1,5 +1,6 @@
 package com.github.rodionk77.di
 
+import com.github.rodionk77.common.NetworkConstants
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.database.AppDatabase
@@ -13,10 +14,10 @@ import com.github.rodionk77.feature.login.presentation.WelcomeViewModel
 import com.github.rodionk77.feature.profile.domain.ProfileRepository
 import com.github.rodionk77.feature.profile.data.ProfileRepositoryImpl
 import com.github.rodionk77.feature.profile.presentation.ProfileViewModel
-import com.github.rodionk77.feature.repoDescription.domain.RepoDescriptionRepository
-import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionRepositoryImpl
-import com.github.rodionk77.feature.repoDescription.presentation.RepoDescriptionViewModel
-import com.github.rodionk77.feature.repoDescription.presentation.RepoFilesViewModel
+import com.github.rodionk77.feature.repoDetails.domain.RepoDetailsRepository
+import com.github.rodionk77.feature.repoDetails.data.RepoDetailsRepositoryImpl
+import com.github.rodionk77.feature.repoDetails.presentation.RepoDetailsViewModel
+import com.github.rodionk77.feature.repoDetails.presentation.RepoFilesViewModel
 import com.github.rodionk77.feature.repos.domain.ReposRepository
 import com.github.rodionk77.feature.repos.data.ReposRepositoryImpl
 import com.github.rodionk77.feature.repos.presentation.ReposViewModel
@@ -59,19 +60,19 @@ val networkModule = module {
                 level = LogLevel.ALL
             }
             defaultRequest {
-                url("https://api.github.com/")
-                header(HttpHeaders.Accept, "application/vnd.github.v3+json")
+                url(NetworkConstants.GITHUB_API_BASE_URL)
+                header(HttpHeaders.Accept, NetworkConstants.GITHUB_ACCEPT_HEADER)
             }
         }.also { client ->
-            val tokenRefreshMutex = Mutex() // объявляем СНАРУЖИ intercept — один экземпляр на все запросы
+            val tokenRefreshMutex = Mutex()
 
             client.plugin(HttpSend).intercept { request ->
-                if (request.url.host != "api.github.com") {
+                if (request.url.host != NetworkConstants.GITHUB_API_HOST) {
                     return@intercept execute(request)
                 }
 
                 val token = tokenStorage.getToken() ?: throw TokenNotFoundException()
-                request.headers.append(HttpHeaders.Authorization, "Bearer $token")
+                request.headers.append(HttpHeaders.Authorization, "${NetworkConstants.BEARER_PREFIX} $token")
 
                 val call = execute(request)
 
@@ -80,19 +81,21 @@ val networkModule = module {
                         val refreshedToken = tokenStorage.getToken()
                         if (refreshedToken != null && refreshedToken != token) {
                             request.headers.remove(HttpHeaders.Authorization)
-                            request.headers.append(HttpHeaders.Authorization, "Bearer $refreshedToken")
+                            request.headers.append(HttpHeaders.Authorization, "${NetworkConstants.BEARER_PREFIX} $refreshedToken")
                             execute(request)
                         } else {
                             val refreshResult = koin.get<AuthRepository>().refreshAccessToken()
-                            if (refreshResult.isSuccess) {
-                                val newToken = refreshResult.getOrNull()!!
-                                request.headers.remove(HttpHeaders.Authorization)
-                                request.headers.append(HttpHeaders.Authorization, "Bearer $newToken")
-                                execute(request)
-                            } else {
-                                tokenStorage.clearAll()
-                                throw TokenNotFoundException()
-                            }
+                            refreshResult.fold(
+                                onSuccess = { newToken ->
+                                    request.headers.remove(HttpHeaders.Authorization)
+                                    request.headers.append(HttpHeaders.Authorization, "${NetworkConstants.BEARER_PREFIX} $newToken")
+                                    execute(request)
+                                },
+                                onFailure = {
+                                    tokenStorage.clearAll()
+                                    throw TokenNotFoundException()
+                                }
+                            )
                         }
                     }
                 } else {
@@ -106,7 +109,7 @@ val networkModule = module {
 val repositoryModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<ReposRepository> { ReposRepositoryImpl(get(), get<AppDatabase>().reposDao(), get<AppDatabase>().userDao()) }
-    single<RepoDescriptionRepository> { RepoDescriptionRepositoryImpl(get(), get<AppDatabase>().repoDescriptionDao()) }
+    single<RepoDetailsRepository> { RepoDetailsRepositoryImpl(get(), get<AppDatabase>().repoDescriptionDao()) }
     single<FavoritesRepository> { FavoritesRepositoryImpl(get<AppDatabase>().favoriteDao()) }
     single<ProfileRepository> { ProfileRepositoryImpl(get(), get(), get<AppDatabase>().userDao(), get()) }
 }
@@ -115,7 +118,7 @@ val viewModelModule = module {
     viewModel { WelcomeViewModel(get()) }
     viewModel { LoginViewModel(get(), get()) }
     viewModel { ReposViewModel(get()) }
-    viewModel { RepoDescriptionViewModel(get(), get(), get()) }
+    viewModel { RepoDetailsViewModel(get(), get(), get()) }
     viewModel { FavoritesViewModel(get()) }
     viewModel { ProfileViewModel(get()) }
     viewModel { RepoFilesViewModel(get(), get()) }

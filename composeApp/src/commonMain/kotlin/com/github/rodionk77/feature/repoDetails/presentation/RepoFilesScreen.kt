@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repoDescription.presentation
+package com.github.rodionk77.feature.repoDetails.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.rodionk77.feature.repoDescription.data.GitHubContentItem
+import com.github.rodionk77.feature.repoDetails.data.GitHubContentItem
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.arrow_back_icon
 import ktsproject.composeapp.generated.resources.back_icon

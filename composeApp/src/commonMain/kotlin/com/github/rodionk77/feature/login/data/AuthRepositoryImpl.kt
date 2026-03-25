@@ -1,5 +1,6 @@
 package com.github.rodionk77.feature.login.data
 
+import com.github.rodionk77.common.NetworkConstants
 import com.github.rodionk77.common.Utils.GitHubApiException
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Tokens
@@ -22,8 +23,8 @@ class AuthRepositoryImpl(
     override suspend fun exchangeCodeForToken(code: String): Result<String> {
         return try {
             val response = httpClient.post {
-                url("https://github.com/login/oauth/access_token")
-                header(HttpHeaders.Accept, "application/json")
+                url(NetworkConstants.GITHUB_AUTH_URL)
+                header(HttpHeaders.Accept, NetworkConstants.GITHUB_AUTH_ACCEPT_HEADER)
                 url {
                     parameters.append("client_id", Tokens.GITHUB_CLIENT_ID)
                     parameters.append("client_secret", Tokens.GITHUB_CLIENT_SECRET)
@@ -57,8 +58,8 @@ class AuthRepositoryImpl(
 
         return try {
             val response = httpClient.post {
-                url("https://github.com/login/oauth/access_token")
-                header(HttpHeaders.Accept, "application/json")
+                url(NetworkConstants.GITHUB_AUTH_URL)
+                header(HttpHeaders.Accept, NetworkConstants.GITHUB_AUTH_ACCEPT_HEADER)
                 url {
                     parameters.append("client_id", Tokens.GITHUB_CLIENT_ID)
                     parameters.append("client_secret", Tokens.GITHUB_CLIENT_SECRET)

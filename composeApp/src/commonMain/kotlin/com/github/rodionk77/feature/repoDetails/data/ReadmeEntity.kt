@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repoDescription.data
+package com.github.rodionk77.feature.repoDetails.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -40,6 +40,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -160,54 +161,57 @@ fun ReposScreen(
                         )
                     }
 
-                    else -> {
+                    else -> ReposList(viewModel, uiState, onNavigateToRepo)
+                }
+            }
+        }
+    }
+}
 
-                        val listState = rememberLazyListState()
-                        LaunchedEffect(listState) {
-                            snapshotFlow {
-                                val lastVisible =
-                                    listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-                                val total = listState.layoutInfo.totalItemsCount
-                                lastVisible != null && lastVisible >= total - 3
-                            }
-                                .distinctUntilChanged()
-                                .filter { it }
-                                .collect {
-                                    viewModel.loadNextPage()
-                                }
-                        }
+@Composable
+fun ReposList(viewModel: ReposViewModel, uiState: MainUiState, onNavigateToRepo: (repoName: String, ownerLogin: String) -> Unit){
+    val listState = rememberLazyListState()
 
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(
-                                items = uiState.filteredRepos,
-                                key = { repo -> repo.id }
-                            ) { repo ->
-                                RepoItem(
-                                    repo = repo,
-                                    avatar = repo.owner.avatarUrl ?: "",
-                                    onClick = { onNavigateToRepo(repo.name, repo.owner.login) }
-                                )
-                            }
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+            val total = listState.layoutInfo.totalItemsCount
+            lastVisible != null && lastVisible >= total - 3
+        }
+    }
 
-                            if (uiState.isPaginating) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
-                                }
-                            }
-                        }
-                    }
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) {
+            viewModel.loadNextPage()
+        }
+    }
+
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(
+            items = uiState.filteredRepos,
+            key = { repo -> repo.id }
+        ) { repo ->
+            RepoItem(
+                repo = repo,
+                avatar = repo.owner.avatarUrl ?: "",
+                onClick = { onNavigateToRepo(repo.name, repo.owner.login) }
+            )
+        }
+
+        if (uiState.isPaginating) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }

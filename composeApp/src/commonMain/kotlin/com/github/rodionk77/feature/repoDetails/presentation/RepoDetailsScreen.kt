@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repoDescription.presentation
+package com.github.rodionk77.feature.repoDetails.presentation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,7 +76,6 @@ import ktsproject.composeapp.generated.resources.create_issue_desc
 import ktsproject.composeapp.generated.resources.issue_body
 import ktsproject.composeapp.generated.resources.issue_created_success
 import ktsproject.composeapp.generated.resources.issue_title
-import ktsproject.composeapp.generated.resources.file_icon
 import ktsproject.composeapp.generated.resources.file_icon_desc
 import ktsproject.composeapp.generated.resources.folder_icon
 import ktsproject.composeapp.generated.resources.report_icon
@@ -103,8 +102,8 @@ private class ReadmeImageTransformer(
 }
 
 @Composable
-fun RepoDescriptionScreen(
-    viewModel: RepoDescriptionViewModel,
+fun RepoDetailsScreen(
+    viewModel: RepoDetailsViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToFiles: (repoName: String, ownerLogin: String) -> Unit
 ) {

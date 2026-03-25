@@ -14,6 +14,7 @@ junit = "4.13.2"
 kotlin = "2.3.0"
 material3 = "1.10.0-alpha05"
 coil = "3.3.0"
+ktor = "3.3.0"
 navigation = "2.9.2"
 napier = "2.7.1"
 datastore = "1.2.0"
@@ -46,11 +47,11 @@ compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-previ
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil"}
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil"}
 
-ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "coil" }
-ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "coil" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "coil" }
-ktor-client-logging = {module = "io.ktor:ktor-client-logging", version.ref = "coil"}
-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "coil" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = {module = "io.ktor:ktor-client-logging", version.ref = "ktor"}
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 navigation-compose = {module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation"}
 napier-logging = {module = "io.github.aakira:napier", version.ref = "napier"}

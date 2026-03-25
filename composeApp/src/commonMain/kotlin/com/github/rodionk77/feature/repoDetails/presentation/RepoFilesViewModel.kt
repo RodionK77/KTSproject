@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repoDescription.presentation
+package com.github.rodionk77.feature.repoDetails.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -7,8 +7,8 @@ import androidx.navigation.toRoute
 import com.github.rodionk77.common.Route
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
-import com.github.rodionk77.feature.repoDescription.data.GitHubContentItem
-import com.github.rodionk77.feature.repoDescription.domain.RepoDescriptionRepository
+import com.github.rodionk77.feature.repoDetails.data.GitHubContentItem
+import com.github.rodionk77.feature.repoDetails.domain.RepoDetailsRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +32,7 @@ data class RepoFilesUiState(
 )
 
 class RepoFilesViewModel(
-    private val repository: RepoDescriptionRepository,
+    private val repository: RepoDetailsRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -58,25 +58,25 @@ class RepoFilesViewModel(
 
             val result = repository.getContents(ownerLogin, repoName, path)
 
-            if (result.isSuccess) {
-                _uiState.update {
-                    it.copy(isLoading = false, items = result.getOrNull() ?: emptyList())
+            result.fold(
+                onSuccess = { items ->
+                    _uiState.update { it.copy(isLoading = false, items = items) }
+                },
+                onFailure = { exception ->
+                    val errorText = when {
+                        exception is TokenNotFoundException ->
+                            UiText.StringRes(Res.string.token_not_detected)
+                        exception.message?.contains("UnknownHostException") == true ||
+                        exception.message?.contains("Unable to resolve host") == true ||
+                        exception.message?.contains("The Internet connection appears to be offline") == true ||
+                        exception.message?.contains("Network is unreachable") == true ->
+                            UiText.StringRes(Res.string.no_internet)
+                        else -> exception.message?.let { UiText.DynamicString(it) }
+                            ?: UiText.StringRes(Res.string.unknown_error)
+                    }
+                    _uiState.update { it.copy(isLoading = false, error = errorText) }
                 }
-            } else {
-                val exception = result.exceptionOrNull()
-                val errorText = when {
-                    exception is TokenNotFoundException ->
-                        UiText.StringRes(Res.string.token_not_detected)
-                    exception?.message?.contains("UnknownHostException") == true ||
-                    exception?.message?.contains("Unable to resolve host") == true ||
-                    exception?.message?.contains("The Internet connection appears to be offline") == true ||
-                    exception?.message?.contains("Network is unreachable") == true ->
-                        UiText.StringRes(Res.string.no_internet)
-                    else -> exception?.message?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringRes(Res.string.unknown_error)
-                }
-                _uiState.update { it.copy(isLoading = false, error = errorText) }
-            }
+            )
         }
     }
 
@@ -91,16 +91,19 @@ class RepoFilesViewModel(
         }
         viewModelScope.launch {
             val result = repository.getFileContent(url)
-            if (result.isSuccess) {
-                _uiState.update { it.copy(isFileLoading = false, fileContent = result.getOrNull()) }
-            } else {
-                _uiState.update {
-                    it.copy(
-                        isFileLoading = false,
-                        fileError = UiText.StringRes(Res.string.unknown_error)
-                    )
+            result.fold(
+                onSuccess = { content ->
+                    _uiState.update { it.copy(isFileLoading = false, fileContent = content) }
+                },
+                onFailure = {
+                    _uiState.update {
+                        it.copy(
+                            isFileLoading = false,
+                            fileError = UiText.StringRes(Res.string.unknown_error)
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 

@@ -1,10 +1,10 @@
-package com.github.rodionk77.feature.repoDescription.domain
+package com.github.rodionk77.feature.repoDetails.domain
 
-import com.github.rodionk77.feature.repoDescription.data.GitHubContentItem
-import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
+import com.github.rodionk77.feature.repoDetails.data.GitHubContentItem
+import com.github.rodionk77.feature.repoDetails.data.RepoDetailsEntity
 
-interface RepoDescriptionRepository {
-    suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDescriptionEntity>
+interface RepoDetailsRepository {
+    suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDetailsEntity>
     suspend fun getReadme(ownerLogin: String, repoName: String): Result<String>
     suspend fun saveReadme(ownerLogin: String, repoName: String, content: String)
     suspend fun createIssue(ownerLogin: String, repoName: String, title: String, body: String): Result<Unit>

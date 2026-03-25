@@ -10,7 +10,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,14 +29,13 @@ import com.github.rodionk77.feature.login.presentation.WelcomeScreen
 import com.github.rodionk77.feature.login.presentation.WelcomeViewModel
 import com.github.rodionk77.feature.profile.presentation.ProfileScreen
 import com.github.rodionk77.feature.profile.presentation.ProfileViewModel
-import com.github.rodionk77.feature.repoDescription.presentation.RepoDescriptionScreen
-import com.github.rodionk77.feature.repoDescription.presentation.RepoDescriptionViewModel
-import com.github.rodionk77.feature.repoDescription.presentation.RepoFilesScreen
-import com.github.rodionk77.feature.repoDescription.presentation.RepoFilesViewModel
+import com.github.rodionk77.feature.repoDetails.presentation.RepoDetailsScreen
+import com.github.rodionk77.feature.repoDetails.presentation.RepoDetailsViewModel
+import com.github.rodionk77.feature.repoDetails.presentation.RepoFilesScreen
+import com.github.rodionk77.feature.repoDetails.presentation.RepoFilesViewModel
 import com.github.rodionk77.feature.repos.presentation.ReposScreen
 import com.github.rodionk77.feature.repos.presentation.ReposViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.serialization.Serializable
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.account_circle_icon
 import ktsproject.composeapp.generated.resources.bookmark_icon
@@ -47,33 +47,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@Serializable
-sealed class Route {
-    @Serializable
-    data object Welcome : Route()
-
-    @Serializable
-    data class Login(val code: String? = null) : Route()
-
-    @Serializable
-    data object Repos : Route()
-
-    @Serializable
-    data class RepoDescription(val repoName: String, val ownerLogin: String) : Route()
-
-    @Serializable
-    data object Profile : Route()
-
-    @Serializable
-    data object Favorites : Route()
-
-    @Serializable
-    data class RepoFiles(
-        val repoName: String,
-        val ownerLogin: String,
-        val path: String = ""
-    ) : Route()
-}
 
 @Composable
 @Preview
@@ -120,7 +93,7 @@ fun App() {
                 }
                 composable<Route.Login>(
                     deepLinks = listOf(
-                        navDeepLink<Route.Login>(basePath = "myapp://oauth2callback")
+                        navDeepLink<Route.Login>(basePath = NetworkConstants.DEEP_LINK_PATH)
                     )
                 ) {
                     LoginScreen(
@@ -139,7 +112,7 @@ fun App() {
                     ReposScreen(
                         viewModel = koinViewModel<ReposViewModel>(),
                         onNavigateToRepo = { repoName, ownerLogin ->
-                            navController.navigate(Route.RepoDescription(repoName, ownerLogin))
+                            navController.navigate(Route.RepoDetails(repoName, ownerLogin))
                         },
                         onNavigateToLogin = {
                             navController.navigate(Route.Login()) {
@@ -148,9 +121,9 @@ fun App() {
                         },
                         )
                 }
-                composable<Route.RepoDescription> {
-                    RepoDescriptionScreen(
-                        viewModel = koinViewModel<RepoDescriptionViewModel>(),
+                composable<Route.RepoDetails> {
+                    RepoDetailsScreen(
+                        viewModel = koinViewModel<RepoDetailsViewModel>(),
                         onNavigateBack = { navController.popBackStack() },
                         onNavigateToFiles = { repoName, ownerLogin ->
                             navController.navigate(Route.RepoFiles(repoName, ownerLogin))
@@ -165,7 +138,7 @@ fun App() {
                             navController.navigate(Route.RepoFiles(repoName, ownerLogin, path))
                         },
                         onNavigateToDescription = {
-                            navController.popBackStack<Route.RepoDescription>(inclusive = false)
+                            navController.popBackStack<Route.RepoDetails>(inclusive = false)
                         }
                     )
                 }
@@ -173,7 +146,7 @@ fun App() {
                     FavoritesScreen(
                         viewModel = koinViewModel<FavoritesViewModel>(),
                         onNavigateToRepo = { repoName, ownerLogin ->
-                            navController.navigate(Route.RepoDescription(repoName, ownerLogin))
+                            navController.navigate(Route.RepoDetails(repoName, ownerLogin))
                         }
                     )
                 }

@@ -1,11 +1,10 @@
-package com.github.rodionk77.feature.repoDescription.data
+package com.github.rodionk77.feature.repoDetails.data
 
 import com.github.rodionk77.common.Utils.HttpException
-import com.github.rodionk77.feature.repoDescription.data.room.RepoDescriptionDao
-import com.github.rodionk77.feature.repoDescription.data.room.toDbEntity
-import com.github.rodionk77.feature.repoDescription.data.room.toDomainEntity
-import com.github.rodionk77.feature.repoDescription.domain.RepoDescriptionRepository
-import io.github.aakira.napier.Napier
+import com.github.rodionk77.feature.repoDetails.data.room.RepoDescriptionDao
+import com.github.rodionk77.feature.repoDetails.data.room.toDbEntity
+import com.github.rodionk77.feature.repoDetails.data.room.toDomainEntity
+import com.github.rodionk77.feature.repoDetails.domain.RepoDetailsRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -16,15 +15,15 @@ import io.ktor.http.contentType
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-class RepoDescriptionRepositoryImpl(
+class RepoDetailsRepositoryImpl(
     private val httpClient: HttpClient,
     private val repoDescriptionDao: RepoDescriptionDao
-) : RepoDescriptionRepository {
+) : RepoDetailsRepository {
 
-    override suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDescriptionEntity> {
+    override suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDetailsEntity> {
         return try {
             val response = httpClient.get("repos/$ownerLogin/$repoName")
-            val repo: RepoDescriptionEntity = response.body()
+            val repo: RepoDetailsEntity = response.body()
             repoDescriptionDao.upsert(repo.toDbEntity())
             Result.success(repo)
         } catch (e: Exception) {

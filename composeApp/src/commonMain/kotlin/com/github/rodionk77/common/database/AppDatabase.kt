@@ -7,8 +7,8 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.room.Transaction
 import com.github.rodionk77.feature.favorites.data.FavoriteDao
 import com.github.rodionk77.feature.favorites.data.FavoriteDbEntity
-import com.github.rodionk77.feature.repoDescription.data.room.RepoDescriptionDao
-import com.github.rodionk77.feature.repoDescription.data.room.RepoDescriptionDbEntity
+import com.github.rodionk77.feature.repoDetails.data.room.RepoDescriptionDao
+import com.github.rodionk77.feature.repoDetails.data.room.RepoDescriptionDbEntity
 import com.github.rodionk77.feature.repos.data.room.RepoDbEntity
 import com.github.rodionk77.feature.repos.data.room.ReposDao
 import com.github.rodionk77.feature.repos.data.room.UserDao

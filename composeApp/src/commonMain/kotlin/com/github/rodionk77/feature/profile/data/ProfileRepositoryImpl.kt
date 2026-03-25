@@ -3,6 +3,7 @@ package com.github.rodionk77.feature.profile.data
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.database.AppDatabase
 import com.github.rodionk77.common.models.UserEntity
+import com.github.rodionk77.feature.profile.domain.ProfileRepository
 import com.github.rodionk77.feature.repos.data.room.UserDao
 import com.github.rodionk77.feature.repos.data.room.toDbEntity
 import com.github.rodionk77.feature.repos.data.room.toDomainEntity
@@ -10,14 +11,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class ProfileRepository(
+class ProfileRepositoryImpl(
     private val httpClient: HttpClient,
     private val tokenStorage: TokenStorage,
     private val userDao: UserDao,
     private val database: AppDatabase
-) {
+) : ProfileRepository {
 
-    suspend fun getProfile(): Result<UserEntity> {
+    override suspend fun getProfile(): Result<UserEntity> {
         return try {
             val response = httpClient.get("user")
             val user: UserEntity = response.body()
@@ -33,11 +34,11 @@ class ProfileRepository(
         }
     }
 
-    suspend fun getCachedProfile(): UserEntity? {
+    override suspend fun getCachedProfile(): UserEntity? {
         return userDao.getUser()?.toDomainEntity()
     }
 
-    suspend fun logout() {
+    override suspend fun logout() {
         tokenStorage.clearAll()
         database.clearAllData()
     }

@@ -7,7 +7,7 @@ import androidx.navigation.toRoute
 import com.github.rodionk77.common.Route
 import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.common.Utils.UnknownServerException
-import com.github.rodionk77.feature.login.data.AuthRepository
+import com.github.rodionk77.feature.login.domain.AuthRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

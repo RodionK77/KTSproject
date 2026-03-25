@@ -3,7 +3,7 @@ package com.github.rodionk77.feature.profile.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.rodionk77.common.Utils.UiText
-import com.github.rodionk77.feature.profile.data.ProfileRepository
+import com.github.rodionk77.feature.profile.domain.ProfileRepository
 import com.github.rodionk77.common.models.UserEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -64,4 +64,11 @@
     <string name="cancel">Отмена</string>
     <string name="issue_created_success">Issue успешно создан!</string>
     <string name="create_issue_desc">Создать новый Issue</string>
+    <string name="browse_files">Просмотр файлов</string>
+    <string name="folder_icon_desc">Папка</string>
+    <string name="file_icon_desc">Файл</string>
+    <string name="empty_directory">Директория пуста</string>
+    <string name="repo_files_title">Файлы репозитория</string>
+    <string name="cannot_preview">Предварительный просмотр недоступен</string>
+    <string name="sheets_leave_icon_desc">Вернуться к описанию репозитория</string>
 </resources>

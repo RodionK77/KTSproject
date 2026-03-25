@@ -1,6 +1,6 @@
 package com.github.rodionk77.feature.favorites.data
 
-import com.github.rodionk77.feature.repoDescription.data.RepoDescriptionEntity
+import com.github.rodionk77.feature.repoDetails.data.RepoDetailsEntity
 import com.github.rodionk77.common.models.OwnerEntity
 import com.github.rodionk77.common.models.RepoEntity
 
@@ -13,7 +13,7 @@ fun FavoriteDbEntity.toRepoEntity() = RepoEntity(
     owner = OwnerEntity(login = ownerLogin, avatarUrl = ownerAvatarUrl)
 )
 
-fun RepoDescriptionEntity.toFavoriteDbEntity() = FavoriteDbEntity(
+fun RepoDetailsEntity.toFavoriteDbEntity() = FavoriteDbEntity(
     id = id,
     name = name,
     description = description,

@@ -1,10 +1,10 @@
-package com.github.rodionk77.feature.repoDescription.data
+package com.github.rodionk77.feature.repoDetails.data
 
-import com.github.rodionk77.feature.repoDescription.data.room.RepoDescriptionDao
-import com.github.rodionk77.feature.repoDescription.data.room.toDbEntity
-import com.github.rodionk77.feature.repoDescription.data.room.toDomainEntity
 import com.github.rodionk77.common.Utils.HttpException
-import io.github.aakira.napier.Napier
+import com.github.rodionk77.feature.repoDetails.data.room.RepoDescriptionDao
+import com.github.rodionk77.feature.repoDetails.data.room.toDbEntity
+import com.github.rodionk77.feature.repoDetails.data.room.toDomainEntity
+import com.github.rodionk77.feature.repoDetails.domain.RepoDetailsRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -15,15 +15,15 @@ import io.ktor.http.contentType
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-class RepoDescriptionRepository (
+class RepoDetailsRepositoryImpl(
     private val httpClient: HttpClient,
     private val repoDescriptionDao: RepoDescriptionDao
-){
+) : RepoDetailsRepository {
 
-    suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDescriptionEntity> {
+    override suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDetailsEntity> {
         return try {
             val response = httpClient.get("repos/$ownerLogin/$repoName")
-            val repo: RepoDescriptionEntity = response.body()
+            val repo: RepoDetailsEntity = response.body()
             repoDescriptionDao.upsert(repo.toDbEntity())
             Result.success(repo)
         } catch (e: Exception) {
@@ -37,7 +37,7 @@ class RepoDescriptionRepository (
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    suspend fun getReadme(ownerLogin: String, repoName: String): Result<String> {
+    override suspend fun getReadme(ownerLogin: String, repoName: String): Result<String> {
         return try {
             val response = httpClient.get("repos/$ownerLogin/$repoName/readme")
             val entity: ReadmeEntity = response.body()
@@ -50,11 +50,11 @@ class RepoDescriptionRepository (
         }
     }
 
-    suspend fun saveReadme(ownerLogin: String, repoName: String, content: String) {
+    override suspend fun saveReadme(ownerLogin: String, repoName: String, content: String) {
         repoDescriptionDao.updateReadme(repoName, ownerLogin, content)
     }
 
-    suspend fun createIssue(ownerLogin: String, repoName: String, title: String, body: String): Result<Unit> {
+    override suspend fun createIssue(ownerLogin: String, repoName: String, title: String, body: String): Result<Unit> {
         return try {
             val response = httpClient.post("repos/$ownerLogin/$repoName/issues") {
                 contentType(ContentType.Application.Json)
@@ -64,6 +64,34 @@ class RepoDescriptionRepository (
                 throw HttpException(response.status.value)
             }
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getContents(
+        ownerLogin: String,
+        repoName: String,
+        path: String
+    ): Result<List<GitHubContentItem>> {
+        return try {
+            val pathSegment = if (path.isEmpty()) "" else "/$path"
+            val response = httpClient.get("repos/$ownerLogin/$repoName/contents$pathSegment")
+            val items: List<GitHubContentItem> = response.body()
+            val sorted = items.sortedWith(
+                compareBy<GitHubContentItem> { if (it.isDirectory) 0 else 1 }
+                    .thenBy { it.name.lowercase() }
+            )
+            Result.success(sorted)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getFileContent(downloadUrl: String): Result<String> {
+        return try {
+            val response = httpClient.get(downloadUrl)
+            Result.success(response.body())
         } catch (e: Exception) {
             Result.failure(e)
         }

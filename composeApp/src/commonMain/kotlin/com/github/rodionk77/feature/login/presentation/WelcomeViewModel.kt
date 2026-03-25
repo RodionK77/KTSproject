@@ -2,7 +2,7 @@ package com.github.rodionk77.feature.login.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.rodionk77.feature.login.data.AuthRepository
+import com.github.rodionk77.feature.login.domain.AuthRepository
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

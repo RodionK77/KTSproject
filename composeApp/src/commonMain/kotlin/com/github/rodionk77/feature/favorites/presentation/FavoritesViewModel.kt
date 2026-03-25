@@ -2,7 +2,7 @@ package com.github.rodionk77.feature.favorites.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.rodionk77.feature.favorites.data.FavoritesRepository
+import com.github.rodionk77.feature.favorites.domain.FavoritesRepository
 import com.github.rodionk77.common.models.RepoEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

@@ -14,6 +14,7 @@ junit = "4.13.2"
 kotlin = "2.3.0"
 material3 = "1.10.0-alpha05"
 coil = "3.3.0"
+ktor = "3.3.0"
 navigation = "2.9.2"
 napier = "2.7.1"
 datastore = "1.2.0"
@@ -22,6 +23,7 @@ room="2.8.4"
 sqlite="2.6.2"
 ksp="2.3.6"
 markdown="0.39.2"
+koin-bom = "4.2.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -45,11 +47,11 @@ compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-previ
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil"}
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil"}
 
-ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "coil" }
-ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "coil" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "coil" }
-ktor-client-logging = {module = "io.ktor:ktor-client-logging", version.ref = "coil"}
-ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "coil" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-logging = {module = "io.ktor:ktor-client-logging", version.ref = "ktor"}
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
 navigation-compose = {module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation"}
 napier-logging = {module = "io.github.aakira:napier", version.ref = "napier"}
@@ -66,6 +68,14 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 multiplatform-markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown" }
 multiplatform-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown" }
 multiplatform-markdown-renderer-coil3 = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "markdown" }
+
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin-bom" }
+koin-core = { module = "io.insert-koin:koin-core" }
+koin-android = { module = "io.insert-koin:koin-android" }
+koin-compose = { module = "io.insert-koin:koin-compose" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
+koin-ktor = { module = "io.insert-koin:koin-ktor" }
+koin-test = { module = "io.insert-koin:koin-test" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

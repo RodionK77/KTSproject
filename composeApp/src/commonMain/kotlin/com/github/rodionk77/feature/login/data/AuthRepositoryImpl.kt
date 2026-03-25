@@ -1,10 +1,12 @@
 package com.github.rodionk77.feature.login.data
 
+import com.github.rodionk77.common.NetworkConstants
 import com.github.rodionk77.common.Utils.GitHubApiException
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Tokens
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UnknownServerException
+import com.github.rodionk77.feature.login.domain.AuthRepository
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -13,16 +15,16 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
 
-class AuthRepository (
+class AuthRepositoryImpl(
     private val httpClient: HttpClient,
     private val tokenStorage: TokenStorage
-)  {
+) : AuthRepository {
 
-    suspend fun exchangeCodeForToken(code: String): Result<String> {
+    override suspend fun exchangeCodeForToken(code: String): Result<String> {
         return try {
             val response = httpClient.post {
-                url("https://github.com/login/oauth/access_token")
-                header(HttpHeaders.Accept, "application/json")
+                url(NetworkConstants.GITHUB_AUTH_URL)
+                header(HttpHeaders.Accept, NetworkConstants.GITHUB_AUTH_ACCEPT_HEADER)
                 url {
                     parameters.append("client_id", Tokens.GITHUB_CLIENT_ID)
                     parameters.append("client_secret", Tokens.GITHUB_CLIENT_SECRET)
@@ -50,14 +52,14 @@ class AuthRepository (
         }
     }
 
-    suspend fun refreshAccessToken(): Result<String> {
+    override suspend fun refreshAccessToken(): Result<String> {
         val refreshToken = tokenStorage.getRefreshToken()
             ?: return Result.failure(TokenNotFoundException())
 
         return try {
             val response = httpClient.post {
-                url("https://github.com/login/oauth/access_token")
-                header(HttpHeaders.Accept, "application/json")
+                url(NetworkConstants.GITHUB_AUTH_URL)
+                header(HttpHeaders.Accept, NetworkConstants.GITHUB_AUTH_ACCEPT_HEADER)
                 url {
                     parameters.append("client_id", Tokens.GITHUB_CLIENT_ID)
                     parameters.append("client_secret", Tokens.GITHUB_CLIENT_SECRET)
@@ -80,12 +82,12 @@ class AuthRepository (
         }
     }
 
-    fun saveToken(token: String) {
+    override fun saveToken(token: String) {
         tokenStorage.saveToken(token)
         Napier.d { "Токен успешно получен и сохранен: $token" }
     }
 
-    fun getToken(): String? {
+    override fun getToken(): String? {
         return tokenStorage.getToken()
     }
 }

@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repoDescription.data
+package com.github.rodionk77.feature.repoDetails.data
 
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.SerialName
@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class RepoDescriptionEntity(
+data class RepoDetailsEntity(
     @SerialName("id") val id: Long,
     @SerialName("name") val name: String,
     @SerialName("description") val description: String? = null,

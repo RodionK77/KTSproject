@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
 import com.github.rodionk77.common.Utils.UnknownServerException
-import com.github.rodionk77.feature.repos.data.ReposRepository
+import com.github.rodionk77.feature.repos.domain.ReposRepository
 import com.github.rodionk77.common.models.RepoEntity
 import com.github.rodionk77.common.models.UserEntity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -133,21 +133,23 @@ class ReposViewModel(
             val nextPage = state.currentPage + 1
             val result = repository.getRepositories(page = nextPage)
 
-            if (result.isSuccess) {
-                val newRepos = result.getOrNull() ?: emptyList()
-                val updatedRepos = (state.repos + newRepos).distinctBy { it.id }
-                _uiState.update {
-                    it.copy(
-                        isPaginating = false,
-                        repos = updatedRepos,
-                        filteredRepos = updatedRepos,
-                        currentPage = nextPage,
-                        hasReachedEnd = newRepos.isEmpty()
-                    )
+            result.fold(
+                onSuccess = { newRepos ->
+                    val updatedRepos = (state.repos + newRepos).distinctBy { it.id }
+                    _uiState.update {
+                        it.copy(
+                            isPaginating = false,
+                            repos = updatedRepos,
+                            filteredRepos = updatedRepos,
+                            currentPage = nextPage,
+                            hasReachedEnd = newRepos.isEmpty()
+                        )
+                    }
+                },
+                onFailure = {
+                    _uiState.update { it.copy(isPaginating = false) }
                 }
-            } else {
-                _uiState.update { it.copy(isPaginating = false) }
-            }
+            )
         }
     }
 

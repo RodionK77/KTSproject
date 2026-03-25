@@ -1,4 +1,4 @@
-package com.github.rodionk77.feature.repoDescription.data.room
+package com.github.rodionk77.feature.repoDetails.data.room
 
 import androidx.room.Dao
 import androidx.room.Query

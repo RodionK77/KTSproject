@@ -53,7 +53,8 @@
     <string name="no_internet">Проблемы с подключением к сети</string>
     <string name="issue_error_400">Некорректный запрос</string>
     <string name="issue_error_403">Нет доступа к репозиторию</string>
-    <string name="issue_error_404">Репозиторий не найден</string>
+    <string name="issue_error_404">Репозиторий или путь не найден</string>
+    <string name="upload_error_409">Конфликт: SHA файла устарел, повторите попытку</string>
     <string name="issue_error_410">Создание issues отключено в репозитории</string>
     <string name="issue_error_422">Ошибка валидации или превышен лимит запросов</string>
     <string name="issue_error_503">Сервис временно недоступен</string>
@@ -71,4 +72,9 @@
     <string name="repo_files_title">Файлы репозитория</string>
     <string name="cannot_preview">Предварительный просмотр недоступен</string>
     <string name="sheets_leave_icon_desc">Вернуться к описанию репозитория</string>
+    <string name="upload_file_icon_desc">Загрузить файл в репозиторий</string>
+    <string name="upload_file_dialog_title">Загрузить файл</string>
+    <string name="upload_confirm">Загрузить</string>
+    <string name="upload_success">Файл успешно загружен!</string>
+    <string name="upload_commit_message">Файл %1$s загружен через мобильный клиент</string>
 </resources>

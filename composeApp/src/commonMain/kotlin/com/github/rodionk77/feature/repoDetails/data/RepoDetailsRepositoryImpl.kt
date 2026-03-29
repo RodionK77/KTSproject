@@ -9,9 +9,11 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLPath
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -92,6 +94,37 @@ class RepoDetailsRepositoryImpl(
         return try {
             val response = httpClient.get(downloadUrl)
             Result.success(response.body())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override suspend fun uploadFile(
+        ownerLogin: String,
+        repoName: String,
+        filePath: String,
+        fileName: String,
+        fileBytes: ByteArray,
+        existingSha: String?,
+        message: String
+    ): Result<Unit> {
+        return try {
+            val base64Content = Base64.encode(fileBytes)
+            val requestBody = UploadFileRequest(
+                message = message,
+                content = base64Content,
+                sha = existingSha?.ifEmpty { null }
+            )
+            val encodedPath = filePath.encodeURLPath()
+            val response = httpClient.put("repos/$ownerLogin/$repoName/contents/$encodedPath") {
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }
+            if (response.status.value !in 200..299) {
+                throw HttpException(response.status.value)
+            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

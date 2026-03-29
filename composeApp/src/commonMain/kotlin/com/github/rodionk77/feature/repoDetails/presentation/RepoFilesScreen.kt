@@ -16,16 +16,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,10 +39,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.rodionk77.common.rememberFilePicker
 import com.github.rodionk77.feature.repoDetails.data.GitHubContentItem
 import ktsproject.composeapp.generated.resources.Res
 import ktsproject.composeapp.generated.resources.arrow_back_icon
 import ktsproject.composeapp.generated.resources.back_icon
+import ktsproject.composeapp.generated.resources.cancel
 import ktsproject.composeapp.generated.resources.cannot_preview
 import ktsproject.composeapp.generated.resources.empty_directory
 import ktsproject.composeapp.generated.resources.error
@@ -51,6 +56,11 @@ import ktsproject.composeapp.generated.resources.repo_files_title
 import ktsproject.composeapp.generated.resources.retry
 import ktsproject.composeapp.generated.resources.sheets_leave_icon
 import ktsproject.composeapp.generated.resources.sheets_leave_icon_desc
+import ktsproject.composeapp.generated.resources.upload_confirm
+import ktsproject.composeapp.generated.resources.upload_file_dialog_title
+import ktsproject.composeapp.generated.resources.upload_file_icon
+import ktsproject.composeapp.generated.resources.upload_file_icon_desc
+import ktsproject.composeapp.generated.resources.upload_success
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -78,104 +88,131 @@ fun RepoFilesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Icon(
-                    painterResource(Res.drawable.arrow_back_icon),
-                    contentDescription = stringResource(Res.string.back_icon),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Text(
-                text = uiState.currentPath.ifEmpty {
-                    stringResource(Res.string.repo_files_title)
-                },
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 4.dp)
-            )
-            IconButton(
-                onClick = onNavigateToDescription,
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Icon(
-                    painterResource(Res.drawable.sheets_leave_icon),
-                    contentDescription = stringResource(Res.string.sheets_leave_icon_desc),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+    val filePicker = rememberFilePicker { picked ->
+        if (picked != null) viewModel.onFilePicked(picked)
+    }
 
-        when {
-            uiState.isLoading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                IconButton(
+                    onClick = onNavigateBack,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        painterResource(Res.drawable.arrow_back_icon),
+                        contentDescription = stringResource(Res.string.back_icon),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = uiState.currentPath.ifEmpty {
+                        stringResource(Res.string.repo_files_title)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 4.dp)
+                )
+                IconButton(
+                    onClick = onNavigateToDescription,
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Icon(
+                        painterResource(Res.drawable.sheets_leave_icon),
+                        contentDescription = stringResource(Res.string.sheets_leave_icon_desc),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
-            uiState.error != null -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    Button(onClick = { viewModel.retry() }) {
-                        Text(stringResource(Res.string.retry))
+            when {
+                uiState.isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
                 }
-            }
 
-            uiState.items.isEmpty() -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(Res.string.empty_directory),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                uiState.error != null -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Button(onClick = { viewModel.retry() }) {
+                            Text(stringResource(Res.string.retry))
+                        }
+                    }
                 }
-            }
 
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(
-                        items = uiState.items,
-                        key = { item -> item.path }
-                    ) { item ->
-                        ContentItem(
-                            item = item,
-                            onClick = {
-                                if (item.isDirectory) {
-                                    onNavigateToSubdir(viewModel.repoName, viewModel.ownerLogin, item.path)
-                                } else if (item.isTextFile()) {
-                                    viewModel.openFile(item)
-                                }
-                            }
+                uiState.items.isEmpty() -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(Res.string.empty_directory),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
+
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(
+                            items = uiState.items,
+                            key = { item -> item.path }
+                        ) { item ->
+                            ContentItem(
+                                item = item,
+                                onClick = {
+                                    if (item.isDirectory) {
+                                        onNavigateToSubdir(viewModel.repoName, viewModel.ownerLogin, item.path)
+                                    } else if (item.isTextFile()) {
+                                        viewModel.openFile(item)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
+
+        FloatingActionButton(
+            onClick = { filePicker.launch() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                painterResource(Res.drawable.upload_file_icon),
+                contentDescription = stringResource(Res.string.upload_file_icon_desc)
+            )
+        }
+    }
+
+    if (uiState.showUploadDialog) {
+        UploadDialog(
+            status = uiState.uploadStatus,
+            fileName = viewModel.pendingFileName,
+            onConfirm = { viewModel.confirmUpload() },
+            onDismiss = { viewModel.dismissUploadDialog() }
+        )
     }
 
     if (uiState.selectedFile != null) {
@@ -228,6 +265,74 @@ fun RepoFilesScreen(
             }
         }
     }
+}
+
+@Composable
+private fun UploadDialog(
+    status: UploadStatus,
+    fileName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { if (status !is UploadStatus.Uploading) onDismiss() },
+        title = { Text(stringResource(Res.string.upload_file_dialog_title)) },
+        text = {
+            when (status) {
+                is UploadStatus.Success -> {
+                    Text(
+                        text = stringResource(Res.string.upload_success),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                is UploadStatus.Uploading -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is UploadStatus.Error -> {
+                    Text(
+                        text = status.message.asString(),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                is UploadStatus.Idle -> {
+                    Text(
+                        text = fileName,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            if (status is UploadStatus.Success) {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            } else {
+                TextButton(
+                    onClick = onConfirm,
+                    enabled = status is UploadStatus.Idle || status is UploadStatus.Error
+                ) {
+                    Text(stringResource(Res.string.upload_confirm))
+                }
+            }
+        },
+        dismissButton = {
+            if (status !is UploadStatus.Success) {
+                TextButton(
+                    onClick = onDismiss,
+                    enabled = status !is UploadStatus.Uploading
+                ) {
+                    Text(stringResource(Res.string.cancel))
+                }
+            }
+        }
+    )
 }
 
 @Composable

@@ -137,18 +137,20 @@ fun ProfileScreen(
                 HorizontalDivider()
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     ProfileStat(
+                        modifier = Modifier.weight(1f),
                         label = stringResource(Res.string.repositories),
                         value = user.publicRepos.toString()
                     )
                     ProfileStat(
+                        modifier = Modifier.weight(1f),
                         label = stringResource(Res.string.followers),
                         value = user.followers.toString()
                     )
                     ProfileStat(
+                        modifier = Modifier.weight(1f),
                         label = stringResource(Res.string.following),
                         value = user.following.toString()
                     )
@@ -212,8 +214,8 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileStat(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+private fun ProfileStat(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleLarge,

@@ -19,14 +19,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
+import ktsproject.composeapp.generated.resources.error_403
+import ktsproject.composeapp.generated.resources.error_404
 import ktsproject.composeapp.generated.resources.no_internet
 import ktsproject.composeapp.generated.resources.token_not_detected
 import ktsproject.composeapp.generated.resources.unknown_error
 import ktsproject.composeapp.generated.resources.upload_commit_message
-import ktsproject.composeapp.generated.resources.upload_error_403
-import ktsproject.composeapp.generated.resources.upload_error_404
-import ktsproject.composeapp.generated.resources.upload_error_409
-import ktsproject.composeapp.generated.resources.upload_error_422
+import ktsproject.composeapp.generated.resources.error_409
+import ktsproject.composeapp.generated.resources.error_422
 
 sealed class UploadStatus {
     data object Idle : UploadStatus()
@@ -170,10 +170,10 @@ class RepoFilesViewModel(
                         e.message?.contains("Network is unreachable") == true ->
                             UiText.StringRes(Res.string.no_internet)
                         e is HttpException -> when (e.code) {
-                            403 -> UiText.StringRes(Res.string.upload_error_403)
-                            404 -> UiText.StringRes(Res.string.upload_error_404)
-                            409 -> UiText.StringRes(Res.string.upload_error_409)
-                            422 -> UiText.StringRes(Res.string.upload_error_422)
+                            403 -> UiText.StringRes(Res.string.error_403)
+                            404 -> UiText.StringRes(Res.string.error_404)
+                            409 -> UiText.StringRes(Res.string.error_409)
+                            422 -> UiText.StringRes(Res.string.error_422)
                             else -> UiText.StringRes(Res.string.unknown_error)
                         }
                         else -> e.message?.let { UiText.DynamicString(it) }

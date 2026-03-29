@@ -20,13 +20,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
-import ktsproject.composeapp.generated.resources.issue_error_400
+import ktsproject.composeapp.generated.resources.error_400
 import ktsproject.composeapp.generated.resources.no_internet
-import ktsproject.composeapp.generated.resources.issue_error_403
-import ktsproject.composeapp.generated.resources.issue_error_404
-import ktsproject.composeapp.generated.resources.issue_error_410
-import ktsproject.composeapp.generated.resources.issue_error_422
-import ktsproject.composeapp.generated.resources.issue_error_503
+import ktsproject.composeapp.generated.resources.error_403
+import ktsproject.composeapp.generated.resources.error_404
+import ktsproject.composeapp.generated.resources.error_410
+import ktsproject.composeapp.generated.resources.error_422
+import ktsproject.composeapp.generated.resources.error_503
 import ktsproject.composeapp.generated.resources.token_not_detected
 import ktsproject.composeapp.generated.resources.unknown_error
 
@@ -153,12 +153,12 @@ class RepoDetailsViewModel(
                         exception.message?.contains("Network is unreachable") == true ->
                             UiText.StringRes(Res.string.no_internet)
                         exception is HttpException -> when (exception.code) {
-                            400 -> UiText.StringRes(Res.string.issue_error_400)
-                            403 -> UiText.StringRes(Res.string.issue_error_403)
-                            404 -> UiText.StringRes(Res.string.issue_error_404)
-                            410 -> UiText.StringRes(Res.string.issue_error_410)
-                            422 -> UiText.StringRes(Res.string.issue_error_422)
-                            503 -> UiText.StringRes(Res.string.issue_error_503)
+                            400 -> UiText.StringRes(Res.string.error_400)
+                            403 -> UiText.StringRes(Res.string.error_403)
+                            404 -> UiText.StringRes(Res.string.error_404)
+                            410 -> UiText.StringRes(Res.string.error_410)
+                            422 -> UiText.StringRes(Res.string.error_422)
+                            503 -> UiText.StringRes(Res.string.error_503)
                             else -> UiText.StringRes(Res.string.unknown_error)
                         }
                         else -> exception.message?.let { UiText.DynamicString(it) }

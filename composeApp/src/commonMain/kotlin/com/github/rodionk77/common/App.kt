@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -45,6 +44,7 @@ import ktsproject.composeapp.generated.resources.repositories
 import ktsproject.composeapp.generated.resources.stacks_icon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import com.github.rodionk77.common.ui.theme.AppTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -52,7 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Preview
 fun App() {
 
-    MaterialTheme {
+    AppTheme {
 
         val navController = rememberNavController()
         val currentBackStack by navController.currentBackStackEntryAsState()

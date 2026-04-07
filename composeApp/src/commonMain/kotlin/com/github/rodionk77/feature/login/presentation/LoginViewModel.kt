@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.github.rodionk77.common.Route
 import com.github.rodionk77.common.Utils.UiText
-import com.github.rodionk77.common.Utils.UnknownServerException
+import com.github.rodionk77.common.Utils.toUiText
 import com.github.rodionk77.feature.login.domain.AuthRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,9 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
-import ktsproject.composeapp.generated.resources.no_internet
-import ktsproject.composeapp.generated.resources.unknown_error
-import ktsproject.composeapp.generated.resources.unknown_server_answer
 
 data class LoginUiState (
     val isLoading: Boolean = false,
@@ -66,16 +63,7 @@ class LoginViewModel(
                 _effect.emit(LoginUiEvent.NavigateToRepos)
             }
             result.onFailure { exception ->
-                val errorText = when {
-                    exception is UnknownServerException -> UiText.StringRes(Res.string.unknown_server_answer)
-                    exception.message?.contains("UnknownHostException") == true ||
-                            exception.message?.contains("Unable to resolve host") == true ||
-                            exception.message?.contains("The Internet connection appears to be offline") == true ||
-                            exception.message?.contains("Network is unreachable") == true ->
-                        UiText.StringRes(Res.string.no_internet)
-                    else -> UiText.StringRes(Res.string.unknown_error)
-                }
-                _uiState.update{it.copy(isLoading = false, error = errorText)}
+                _uiState.update { it.copy(isLoading = false, error = exception.toUiText()) }
             }
         }
     }

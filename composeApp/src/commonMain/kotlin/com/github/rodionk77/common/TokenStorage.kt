@@ -15,6 +15,7 @@ class TokenStorage(private val kVault: KVault) {
     companion object {
         private const val TOKEN_KEY = "github_access_token"
         private const val REFRESH_TOKEN_KEY = "github_refresh_token"
+        private const val WELCOME_SEEN_KEY = "welcome_seen"
     }
 
     fun saveToken(token: String) {
@@ -42,6 +43,10 @@ class TokenStorage(private val kVault: KVault) {
     fun clearRefreshToken() {
         kVault.deleteObject(REFRESH_TOKEN_KEY)
     }
+
+    fun hasSeenWelcome(): Boolean = kVault.existsObject(WELCOME_SEEN_KEY)
+
+    fun markWelcomeSeen() { kVault.set(WELCOME_SEEN_KEY, true) }
 
     fun clearAll() {
         clearToken()

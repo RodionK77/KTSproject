@@ -110,7 +110,7 @@ fun ReposScreen(
 
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = viewModel::onSearchQueryChanged,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
@@ -147,7 +147,7 @@ fun ReposScreen(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
+                                text = "${stringResource(Res.string.error)}: ${uiState.error?.asString().orEmpty()}",
                                 color = MaterialTheme.colorScheme.error,
                             )
                             Spacer(modifier = Modifier.height(8.dp))

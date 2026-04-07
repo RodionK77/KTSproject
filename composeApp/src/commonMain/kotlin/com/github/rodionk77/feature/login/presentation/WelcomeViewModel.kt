@@ -40,12 +40,21 @@ class WelcomeViewModel(
     private fun checkToken() {
         viewModelScope.launch {
             val token = repository.getToken()
-            if (token != null) {
-                Napier.d { "Токен уже получен: $token" }
-                _effect.emit(WelcomeUiEvent.NavigateToRepos)
-            } else {
-                _uiState.update { WelcomeUiState.NoToken }
+            when {
+                token != null -> {
+                    Napier.d { "Токен уже получен: $token" }
+                    _effect.emit(WelcomeUiEvent.NavigateToRepos)
+                }
+                repository.hasSeenWelcome() -> _effect.emit(WelcomeUiEvent.NavigateToLogin)
+                else -> _uiState.update { WelcomeUiState.NoToken }
             }
+        }
+    }
+
+    fun onGoToLoginClicked() {
+        repository.markWelcomeSeen()
+        viewModelScope.launch {
+            _effect.emit(WelcomeUiEvent.NavigateToLogin)
         }
     }
 }

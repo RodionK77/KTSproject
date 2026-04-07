@@ -10,6 +10,7 @@ import com.github.rodionk77.feature.repos.data.room.toDomainEntity
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import kotlin.coroutines.cancellation.CancellationException
 
 class ProfileRepositoryImpl(
     private val httpClient: HttpClient,
@@ -19,19 +20,14 @@ class ProfileRepositoryImpl(
 ) : ProfileRepository {
 
     override suspend fun getProfile(): Result<UserEntity> {
-        return try {
+        return runCatching {
             val response = httpClient.get("user")
             val user: UserEntity = response.body()
             userDao.upsertUser(user.toDbEntity())
-            Result.success(user)
-        } catch (e: Exception) {
-            val cached = userDao.getUser()
-            if (cached != null) {
-                Result.success(cached.toDomainEntity())
-            } else {
-                Result.failure(e)
-            }
-        }
+            user
+        }.recoverCatching { e ->
+            userDao.getUser()?.toDomainEntity() ?: throw e
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun getCachedProfile(): UserEntity? {

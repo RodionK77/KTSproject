@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.github.rodionk77.common.Route
-import com.github.rodionk77.common.Utils.HttpException
-import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
+import com.github.rodionk77.common.Utils.toUiText
 import com.github.rodionk77.feature.favorites.domain.FavoritesRepository
 import com.github.rodionk77.feature.repoDetails.data.RepoDetailsEntity
 import com.github.rodionk77.feature.repoDetails.domain.RepoDetailsRepository
@@ -20,15 +19,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
-import ktsproject.composeapp.generated.resources.error_400
-import ktsproject.composeapp.generated.resources.no_internet
-import ktsproject.composeapp.generated.resources.error_403
-import ktsproject.composeapp.generated.resources.error_404
-import ktsproject.composeapp.generated.resources.error_410
-import ktsproject.composeapp.generated.resources.error_422
-import ktsproject.composeapp.generated.resources.error_503
-import ktsproject.composeapp.generated.resources.token_not_detected
-import ktsproject.composeapp.generated.resources.unknown_error
 
 sealed class IssueCreationStatus {
     data object Idle : IssueCreationStatus()
@@ -94,17 +84,7 @@ class RepoDetailsViewModel(
                         }
                     },
                     onFailure = { exception ->
-                        val errorText = when {
-                            exception is TokenNotFoundException -> UiText.StringRes(Res.string.token_not_detected)
-                            exception.message?.contains("UnknownHostException") == true ||
-                                    exception.message?.contains("Unable to resolve host") == true ||
-                                    exception.message?.contains("The Internet connection appears to be offline") == true ||
-                                    exception.message?.contains("Network is unreachable") == true ->
-                                UiText.StringRes(Res.string.no_internet)
-                            else -> exception.message?.let { UiText.DynamicString(it) }
-                                ?: UiText.StringRes(Res.string.unknown_error)
-                        }
-                        _uiState.update { it.copy(isLoading = false, error = errorText) }
+                        _uiState.update { it.copy(isLoading = false, error = exception.toUiText()) }
                     }
                 )
             }
@@ -145,26 +125,7 @@ class RepoDetailsViewModel(
                     _uiState.update { it.copy(issueCreationStatus = IssueCreationStatus.Success) }
                 },
                 onFailure = { exception ->
-                    val errorText = when {
-                        exception is TokenNotFoundException -> UiText.StringRes(Res.string.token_not_detected)
-                        exception.message?.contains("UnknownHostException") == true ||
-                        exception.message?.contains("Unable to resolve host") == true ||
-                        exception.message?.contains("The Internet connection appears to be offline") == true ||
-                        exception.message?.contains("Network is unreachable") == true ->
-                            UiText.StringRes(Res.string.no_internet)
-                        exception is HttpException -> when (exception.code) {
-                            400 -> UiText.StringRes(Res.string.error_400)
-                            403 -> UiText.StringRes(Res.string.error_403)
-                            404 -> UiText.StringRes(Res.string.error_404)
-                            410 -> UiText.StringRes(Res.string.error_410)
-                            422 -> UiText.StringRes(Res.string.error_422)
-                            503 -> UiText.StringRes(Res.string.error_503)
-                            else -> UiText.StringRes(Res.string.unknown_error)
-                        }
-                        else -> exception.message?.let { UiText.DynamicString(it) }
-                            ?: UiText.StringRes(Res.string.unknown_error)
-                    }
-                    _uiState.update { it.copy(issueCreationStatus = IssueCreationStatus.Error(errorText)) }
+                    _uiState.update { it.copy(issueCreationStatus = IssueCreationStatus.Error(exception.toUiText())) }
                 }
             )
         }

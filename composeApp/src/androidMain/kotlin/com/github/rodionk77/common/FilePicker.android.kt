@@ -23,8 +23,7 @@ actual fun rememberFilePicker(onFilePicked: (PickedFile?) -> Unit): FilePickerLa
         }
         val name = context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            cursor.moveToFirst()
-            cursor.getString(nameIndex)
+            if (nameIndex >= 0 && cursor.moveToFirst()) cursor.getString(nameIndex) else null
         } ?: uri.lastPathSegment?.substringAfterLast('/') ?: "file"
         val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
         if (bytes != null) onFilePicked(PickedFile(name, bytes)) else onFilePicked(null)

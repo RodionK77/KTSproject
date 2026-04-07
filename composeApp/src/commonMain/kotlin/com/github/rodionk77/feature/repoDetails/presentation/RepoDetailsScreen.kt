@@ -108,6 +108,7 @@ fun RepoDetailsScreen(
     onNavigateToFiles: (repoName: String, ownerLogin: String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val repo = uiState.repo
     var selectedImageUrl by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -127,8 +128,7 @@ fun RepoDetailsScreen(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            if (uiState.repo != null) {
-                val repo = uiState.repo!!
+            if (repo != null) {
                 Row {
                     IconButton(
                         onClick = { onNavigateToFiles(repo.name, repo.owner.login) },
@@ -170,7 +170,7 @@ fun RepoDetailsScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
+                        text = "${stringResource(Res.string.error)}: ${uiState.error?.asString().orEmpty()}",
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -180,8 +180,7 @@ fun RepoDetailsScreen(
                 }
             }
 
-            uiState.repo != null -> {
-                val repo = uiState.repo!!
+            repo != null -> {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -235,7 +234,7 @@ fun RepoDetailsScreen(
                     if (!uiState.readme.isNullOrBlank()) {
                         HorizontalDivider()
                         Markdown(
-                            content = uiState.readme!!,
+                            content = uiState.readme ?: "",
                             imageTransformer = remember { ReadmeImageTransformer { url -> selectedImageUrl = url } }
                         )
                     }
@@ -244,7 +243,7 @@ fun RepoDetailsScreen(
             }
         }
     }
-    if (uiState.repo != null) {
+    if (repo != null) {
         FloatingActionButton(
             onClick = { viewModel.showCreateIssueDialog() },
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)

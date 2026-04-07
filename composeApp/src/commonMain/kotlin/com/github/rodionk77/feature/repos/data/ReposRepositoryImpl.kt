@@ -10,6 +10,7 @@ import com.github.rodionk77.feature.repos.domain.ReposRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import kotlin.coroutines.cancellation.CancellationException
 
 class ReposRepositoryImpl(
     private val httpClient: HttpClient,
@@ -18,7 +19,13 @@ class ReposRepositoryImpl(
 ) : ReposRepository {
 
     override suspend fun getRepositories(page: Int, perPage: Int, useCache: Boolean): Result<List<RepoEntity>> {
-        return try {
+        if (useCache && page == 1) {
+            val cached = reposDao.getAll()
+            if (cached.isNotEmpty()) {
+                return Result.success(cached.map { it.toDomainEntity() })
+            }
+        }
+        return runCatching {
             val response = httpClient.get("user/repos") {
                 url {
                     parameters.append("page", page.toString())
@@ -27,34 +34,18 @@ class ReposRepositoryImpl(
             }
             val repos: List<RepoEntity> = response.body()
             reposDao.upsertAll(repos.map { it.toDbEntity() })
-            Result.success(repos)
-        } catch (e: Exception) {
-            if (useCache && page == 1) {
-                val cached = reposDao.getAll()
-                if (cached.isNotEmpty()) {
-                    Result.success(cached.map { it.toDomainEntity() })
-                } else {
-                    Result.failure(e)
-                }
-            } else {
-                Result.failure(e)
-            }
-        }
+            repos
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun getProfile(): Result<UserEntity> {
-        return try {
+        return runCatching {
             val response = httpClient.get("user")
             val user: UserEntity = response.body()
             userDao.upsertUser(user.toDbEntity())
-            Result.success(user)
-        } catch (e: Exception) {
-            val cached = userDao.getUser()
-            if (cached != null) {
-                Result.success(cached.toDomainEntity())
-            } else {
-                Result.failure(e)
-            }
-        }
+            user
+        }.recoverCatching { e ->
+            userDao.getUser()?.toDomainEntity() ?: throw e
+        }.onFailure { if (it is CancellationException) throw it }
     }
 }

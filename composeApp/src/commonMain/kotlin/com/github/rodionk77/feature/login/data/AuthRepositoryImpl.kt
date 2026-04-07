@@ -1,6 +1,6 @@
 package com.github.rodionk77.feature.login.data
 
-import com.github.rodionk77.common.NetworkConstants
+import com.github.rodionk77.common.Constants
 import com.github.rodionk77.common.Utils.GitHubApiException
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Tokens
@@ -14,6 +14,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
+import kotlin.coroutines.cancellation.CancellationException
 
 class AuthRepositoryImpl(
     private val httpClient: HttpClient,
@@ -21,45 +22,37 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
 
     override suspend fun exchangeCodeForToken(code: String): Result<String> {
-        return try {
+        return runCatching {
             val response = httpClient.post {
-                url(NetworkConstants.GITHUB_AUTH_URL)
-                header(HttpHeaders.Accept, NetworkConstants.GITHUB_AUTH_ACCEPT_HEADER)
+                url(Constants.GITHUB_AUTH_URL)
+                header(HttpHeaders.Accept, Constants.GITHUB_AUTH_ACCEPT_HEADER)
                 url {
                     parameters.append("client_id", Tokens.GITHUB_CLIENT_ID)
                     parameters.append("client_secret", Tokens.GITHUB_CLIENT_SECRET)
                     parameters.append("code", code)
                 }
             }
-
             val tokenResponse: GitHubTokenResponse = response.body()
-
             if (tokenResponse.error != null) {
-                Result.failure(GitHubApiException("GitHub Error: ${tokenResponse.errorDescription ?: tokenResponse.error}"))
+                throw GitHubApiException("GitHub Error: ${tokenResponse.errorDescription ?: tokenResponse.error}")
             }
-            else if (tokenResponse.accessToken != null) {
-                tokenStorage.saveToken(tokenResponse.accessToken)
-                Napier.d { "Токен успешно получен и сохранен: ${tokenResponse.accessToken}" }
-                tokenResponse.refreshToken?.let { tokenStorage.saveRefreshToken(it) }
-                Napier.d { "Токен обновления успешно получен и сохранен: ${tokenResponse.refreshToken}" }
-                Result.success(tokenResponse.accessToken)
-            }
-            else {
-                Result.failure(UnknownServerException())
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+            val accessToken = tokenResponse.accessToken ?: throw UnknownServerException()
+            tokenStorage.saveToken(accessToken)
+            Napier.d { "Токен успешно получен и сохранен: $accessToken" }
+            tokenResponse.refreshToken?.let { tokenStorage.saveRefreshToken(it) }
+            Napier.d { "Токен обновления успешно получен и сохранен: ${tokenResponse.refreshToken}" }
+            accessToken
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun refreshAccessToken(): Result<String> {
         val refreshToken = tokenStorage.getRefreshToken()
             ?: return Result.failure(TokenNotFoundException())
 
-        return try {
+        return runCatching {
             val response = httpClient.post {
-                url(NetworkConstants.GITHUB_AUTH_URL)
-                header(HttpHeaders.Accept, NetworkConstants.GITHUB_AUTH_ACCEPT_HEADER)
+                url(Constants.GITHUB_AUTH_URL)
+                header(HttpHeaders.Accept, Constants.GITHUB_AUTH_ACCEPT_HEADER)
                 url {
                     parameters.append("client_id", Tokens.GITHUB_CLIENT_ID)
                     parameters.append("client_secret", Tokens.GITHUB_CLIENT_SECRET)
@@ -68,18 +61,14 @@ class AuthRepositoryImpl(
                 }
             }
             val tokenResponse: GitHubTokenResponse = response.body()
-
-            if (tokenResponse.accessToken != null) {
-                tokenStorage.saveToken(tokenResponse.accessToken)
-                tokenResponse.refreshToken?.let { tokenStorage.saveRefreshToken(it) }
-                Result.success(tokenResponse.accessToken)
-            } else {
+            val accessToken = tokenResponse.accessToken ?: run {
                 tokenStorage.clearAll()
-                Result.failure(TokenNotFoundException())
+                throw TokenNotFoundException()
             }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+            tokenStorage.saveToken(accessToken)
+            tokenResponse.refreshToken?.let { tokenStorage.saveRefreshToken(it) }
+            accessToken
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override fun saveToken(token: String) {
@@ -87,7 +76,9 @@ class AuthRepositoryImpl(
         Napier.d { "Токен успешно получен и сохранен: $token" }
     }
 
-    override fun getToken(): String? {
-        return tokenStorage.getToken()
-    }
+    override fun getToken(): String? = tokenStorage.getToken()
+
+    override fun hasSeenWelcome(): Boolean = tokenStorage.hasSeenWelcome()
+
+    override fun markWelcomeSeen() = tokenStorage.markWelcomeSeen()
 }

@@ -1,6 +1,6 @@
 package com.github.rodionk77.di
 
-import com.github.rodionk77.common.NetworkConstants
+import com.github.rodionk77.common.Constants
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.database.AppDatabase
@@ -60,19 +60,19 @@ val networkModule = module {
                 level = LogLevel.ALL
             }
             defaultRequest {
-                url(NetworkConstants.GITHUB_API_BASE_URL)
-                header(HttpHeaders.Accept, NetworkConstants.GITHUB_ACCEPT_HEADER)
+                url(Constants.GITHUB_API_BASE_URL)
+                header(HttpHeaders.Accept, Constants.GITHUB_ACCEPT_HEADER)
             }
         }.also { client ->
             val tokenRefreshMutex = Mutex()
 
             client.plugin(HttpSend).intercept { request ->
-                if (request.url.host != NetworkConstants.GITHUB_API_HOST) {
+                if (request.url.host != Constants.GITHUB_API_HOST) {
                     return@intercept execute(request)
                 }
 
                 val token = tokenStorage.getToken() ?: throw TokenNotFoundException()
-                request.headers.append(HttpHeaders.Authorization, "${NetworkConstants.BEARER_PREFIX} $token")
+                request.headers.append(HttpHeaders.Authorization, "${Constants.BEARER_PREFIX} $token")
 
                 val call = execute(request)
 
@@ -81,14 +81,14 @@ val networkModule = module {
                         val refreshedToken = tokenStorage.getToken()
                         if (refreshedToken != null && refreshedToken != token) {
                             request.headers.remove(HttpHeaders.Authorization)
-                            request.headers.append(HttpHeaders.Authorization, "${NetworkConstants.BEARER_PREFIX} $refreshedToken")
+                            request.headers.append(HttpHeaders.Authorization, "${Constants.BEARER_PREFIX} $refreshedToken")
                             execute(request)
                         } else {
                             val refreshResult = koin.get<AuthRepository>().refreshAccessToken()
                             refreshResult.fold(
                                 onSuccess = { newToken ->
                                     request.headers.remove(HttpHeaders.Authorization)
-                                    request.headers.append(HttpHeaders.Authorization, "${NetworkConstants.BEARER_PREFIX} $newToken")
+                                    request.headers.append(HttpHeaders.Authorization, "${Constants.BEARER_PREFIX} $newToken")
                                     execute(request)
                                 },
                                 onFailure = {

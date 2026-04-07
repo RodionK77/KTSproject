@@ -80,7 +80,7 @@ fun ProfileScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
+                    text = "${stringResource(Res.string.error)}: ${uiState.error?.asString().orEmpty()}",
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(16.dp)
                 )

@@ -24,5 +24,5 @@ private fun documentDirectory(): String {
         create = false,
         error = null,
     )
-    return requireNotNull(documentDirectory?.path)
+    return requireNotNull(documentDirectory?.path) { "Cannot resolve iOS documents directory" }
 }

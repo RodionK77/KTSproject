@@ -147,7 +147,7 @@ fun RepoFilesScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
+                            text = "${stringResource(Res.string.error)}: ${uiState.error?.asString().orEmpty()}",
                             color = MaterialTheme.colorScheme.error,
                             modifier = Modifier.padding(16.dp)
                         )
@@ -228,7 +228,7 @@ fun RepoFilesScreen(
                     .padding(bottom = 32.dp)
             ) {
                 Text(
-                    text = uiState.selectedFile!!.name,
+                    text = uiState.selectedFile?.name.orEmpty(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -246,14 +246,14 @@ fun RepoFilesScreen(
                     }
                     uiState.fileError != null -> {
                         Text(
-                            text = uiState.fileError!!.asString(),
+                            text = uiState.fileError?.asString().orEmpty(),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                     uiState.fileContent != null -> {
                         Text(
-                            text = uiState.fileContent!!,
+                            text = uiState.fileContent.orEmpty(),
                             style = MaterialTheme.typography.bodySmall,
                             fontFamily = FontFamily.Monospace,
                             modifier = Modifier

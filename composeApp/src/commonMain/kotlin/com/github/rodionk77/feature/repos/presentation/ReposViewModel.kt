@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.rodionk77.common.Utils.TokenNotFoundException
 import com.github.rodionk77.common.Utils.UiText
-import com.github.rodionk77.common.Utils.UnknownServerException
+import com.github.rodionk77.common.Utils.toUiText
 import com.github.rodionk77.feature.repos.domain.ReposRepository
 import com.github.rodionk77.common.models.RepoEntity
 import com.github.rodionk77.common.models.UserEntity
@@ -24,9 +24,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ktsproject.composeapp.generated.resources.Res
-import ktsproject.composeapp.generated.resources.no_internet
-import ktsproject.composeapp.generated.resources.unknown_error
-import ktsproject.composeapp.generated.resources.unknown_server_answer
 
 data class MainUiState(
     val isLoading: Boolean = true,
@@ -99,18 +96,7 @@ class ReposViewModel(
                     return@launch
                 }
 
-                val errorText = when {
-                    exception?.message?.contains("UnknownHostException") == true ||
-                            exception?.message?.contains("Unable to resolve host") == true ||
-                            exception?.message?.contains("The Internet connection appears to be offline") == true ||
-                            exception?.message?.contains("Network is unreachable") == true ->
-                        UiText.StringRes(Res.string.no_internet)
-                    else -> exception?.message?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringRes(Res.string.unknown_error)
-
-                }
-
-                _uiState.update { it.copy(isLoading = false, error = errorText) }
+                _uiState.update { it.copy(isLoading = false, error = exception.toUiText()) }
             }
         }
     }
@@ -207,17 +193,8 @@ class ReposViewModel(
                 _effect.emit(MainUiEvent.RefreshSuccess)
             } else {
                 val exception = profileResult.exceptionOrNull() ?: reposResult.exceptionOrNull()
-                val errorText = when {
-                    exception?.message?.contains("UnknownHostException") == true ||
-                            exception?.message?.contains("Unable to resolve host") == true ||
-                            exception?.message?.contains("The Internet connection appears to be offline") == true ||
-                            exception?.message?.contains("Network is unreachable") == true ->
-                        UiText.StringRes(Res.string.no_internet)
-                    else -> exception?.message?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringRes(Res.string.unknown_error)
-                }
                 _uiState.update { it.copy(isRefreshing = false) }
-                _effect.emit(MainUiEvent.RefreshError(errorText))
+                _effect.emit(MainUiEvent.RefreshError(exception.toUiText()))
             }
         }
     }

@@ -77,4 +77,6 @@
     <string name="upload_confirm">Загрузить</string>
     <string name="upload_success">Файл успешно загружен!</string>
     <string name="upload_commit_message">Файл %1$s загружен через мобильный клиент</string>
+    <string name="recent_activity">Недавняя активность</string>
+    <string name="no_recent_activity">Нет недавней активности</string>
 </resources>

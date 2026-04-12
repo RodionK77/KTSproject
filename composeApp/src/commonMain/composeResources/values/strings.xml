@@ -77,4 +77,6 @@
     <string name="upload_confirm">Upload</string>
     <string name="upload_success">File uploaded successfully!</string>
     <string name="upload_commit_message">File %1$s uploaded via mobile client</string>
+    <string name="recent_activity">Recent activity</string>
+    <string name="no_recent_activity">No recent activity</string>
 </resources>

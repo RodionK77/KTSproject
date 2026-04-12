@@ -3,6 +3,7 @@ package com.github.rodionk77.feature.profile.data
 import com.github.rodionk77.common.TokenStorage
 import com.github.rodionk77.common.database.AppDatabase
 import com.github.rodionk77.common.models.UserEntity
+import com.github.rodionk77.feature.profile.data.models.GitHubEventEntity
 import com.github.rodionk77.feature.profile.domain.ProfileRepository
 import com.github.rodionk77.feature.repos.data.room.UserDao
 import com.github.rodionk77.feature.repos.data.room.toDbEntity
@@ -32,6 +33,18 @@ class ProfileRepositoryImpl(
 
     override suspend fun getCachedProfile(): UserEntity? {
         return userDao.getUser()?.toDomainEntity()
+    }
+
+    override suspend fun getEvents(username: String, page: Int, perPage: Int): Result<List<GitHubEventEntity>> {
+        return runCatching {
+            val response = httpClient.get("users/$username/events") {
+                url {
+                    parameters.append("page", page.toString())
+                    parameters.append("per_page", perPage.toString())
+                }
+            }
+            response.body<List<GitHubEventEntity>>()
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun logout() {

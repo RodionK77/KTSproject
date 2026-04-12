@@ -58,7 +58,7 @@ fun FavoritesScreen(
 
         OutlinedTextField(
             value = searchQuery,
-            onValueChange = viewModel::onSearchQueryChanged,
+            onValueChange = { viewModel.onSearchQueryChanged(it) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),

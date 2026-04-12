@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +49,7 @@ import com.github.rodionk77.common.ui.RepoItem
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import ktsproject.composeapp.generated.resources.clear_icon
+import ktsproject.composeapp.generated.resources.logout
 import ktsproject.composeapp.generated.resources.refresh_success
 import ktsproject.composeapp.generated.resources.retry
 
@@ -108,7 +110,7 @@ fun ReposScreen(
 
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = viewModel::onSearchQueryChanged,
+                    onValueChange = { viewModel.onSearchQueryChanged(it) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
@@ -145,7 +147,7 @@ fun ReposScreen(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "${stringResource(Res.string.error)}: ${uiState.error!!.asString()}",
+                                text = "${stringResource(Res.string.error)}: ${uiState.error?.asString().orEmpty()}",
                                 color = MaterialTheme.colorScheme.error,
                             )
                             Spacer(modifier = Modifier.height(8.dp))

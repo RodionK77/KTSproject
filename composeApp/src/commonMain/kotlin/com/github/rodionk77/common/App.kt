@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -21,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import com.github.rodionk77.common.Constants.ANIMATION_DURATION
 import com.github.rodionk77.feature.favorites.presentation.FavoritesScreen
 import com.github.rodionk77.feature.favorites.presentation.FavoritesViewModel
 import com.github.rodionk77.feature.login.presentation.LoginScreen
@@ -45,6 +45,7 @@ import ktsproject.composeapp.generated.resources.repositories
 import ktsproject.composeapp.generated.resources.stacks_icon
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import com.github.rodionk77.common.ui.theme.AppTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -52,7 +53,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Preview
 fun App() {
 
-    MaterialTheme {
+    AppTheme {
 
         val navController = rememberNavController()
         val currentBackStack by navController.currentBackStackEntryAsState()
@@ -64,16 +65,18 @@ fun App() {
 
 
         Scaffold(
-            bottomBar = {BottomBar(showBottomBar, navController)},
+            bottomBar = {
+                BottomBar(showBottomBar, navController)
+            },
         ) { innerPadding ->
             NavHost(
                 navController = navController,
                 startDestination = Route.Welcome,
                 modifier = Modifier.padding(innerPadding),
-                enterTransition = { fadeIn(animationSpec = tween(600)) },
-                exitTransition = { fadeOut(animationSpec = tween(600)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(600)) },
-                popExitTransition = { fadeOut(animationSpec = tween(600)) }
+                enterTransition = { fadeIn(animationSpec = tween(ANIMATION_DURATION)) },
+                exitTransition = { fadeOut(animationSpec = tween(ANIMATION_DURATION)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(ANIMATION_DURATION)) },
+                popExitTransition = { fadeOut(animationSpec = tween(ANIMATION_DURATION)) }
             ) {
                 composable<Route.Welcome> {
                     WelcomeScreen(
@@ -93,7 +96,7 @@ fun App() {
                 }
                 composable<Route.Login>(
                     deepLinks = listOf(
-                        navDeepLink<Route.Login>(basePath = NetworkConstants.DEEP_LINK_PATH)
+                        navDeepLink<Route.Login>(basePath = Constants.DEEP_LINK_PATH)
                     )
                 ) {
                     LoginScreen(

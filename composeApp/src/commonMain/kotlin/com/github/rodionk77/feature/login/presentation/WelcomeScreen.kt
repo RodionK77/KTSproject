@@ -84,7 +84,7 @@ fun WelcomeScreen(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
-                    onClick = onNavigateToLogin,
+                    onClick = { viewModel.onGoToLoginClicked() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp, bottom = 16.dp)

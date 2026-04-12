@@ -5,4 +5,6 @@ interface AuthRepository {
     suspend fun refreshAccessToken(): Result<String>
     fun saveToken(token: String)
     fun getToken(): String?
+    fun hasSeenWelcome(): Boolean
+    fun markWelcomeSeen()
 }

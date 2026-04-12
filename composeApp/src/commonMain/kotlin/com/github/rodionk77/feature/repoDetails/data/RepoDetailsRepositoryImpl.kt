@@ -9,10 +9,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLPath
+import io.ktor.http.isSuccess
 import kotlin.io.encoding.Base64
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 class RepoDetailsRepositoryImpl(
@@ -21,33 +25,27 @@ class RepoDetailsRepositoryImpl(
 ) : RepoDetailsRepository {
 
     override suspend fun getRepository(ownerLogin: String, repoName: String): Result<RepoDetailsEntity> {
-        return try {
+        return runCatching {
             val response = httpClient.get("repos/$ownerLogin/$repoName")
             val repo: RepoDetailsEntity = response.body()
             repoDescriptionDao.upsert(repo.toDbEntity())
-            Result.success(repo)
-        } catch (e: Exception) {
-            val cached = repoDescriptionDao.get(repoName, ownerLogin)
-            if (cached != null) {
-                Result.success(cached.toDomainEntity())
-            } else {
-                Result.failure(e)
-            }
-        }
+            repo
+        }.recoverCatching { e ->
+            repoDescriptionDao.get(repoName, ownerLogin)?.toDomainEntity() ?: throw e
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     @OptIn(ExperimentalEncodingApi::class)
     override suspend fun getReadme(ownerLogin: String, repoName: String): Result<String> {
-        return try {
+        return runCatching {
             val response = httpClient.get("repos/$ownerLogin/$repoName/readme")
             val entity: ReadmeEntity = response.body()
             val decoded = Base64.decode(entity.content.replace("\n", "")).decodeToString()
             val baseUrl = entity.downloadUrl?.substringBeforeLast("/")?.plus("/")
-            Result.success(preprocessMarkdown(decoded, baseUrl))
-        } catch (e: Exception) {
-            val cached = repoDescriptionDao.get(repoName, ownerLogin)?.readmeContent
-            if (cached != null) Result.success(cached) else Result.failure(e)
-        }
+            preprocessMarkdown(decoded, baseUrl)
+        }.recoverCatching { e ->
+            repoDescriptionDao.get(repoName, ownerLogin)?.readmeContent ?: throw e
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun saveReadme(ownerLogin: String, repoName: String, content: String) {
@@ -55,18 +53,15 @@ class RepoDetailsRepositoryImpl(
     }
 
     override suspend fun createIssue(ownerLogin: String, repoName: String, title: String, body: String): Result<Unit> {
-        return try {
+        return runCatching {
             val response = httpClient.post("repos/$ownerLogin/$repoName/issues") {
                 contentType(ContentType.Application.Json)
                 setBody(CreateIssueRequest(title, body))
             }
-            if (response.status.value !in 200..299) {
+            if (!response.status.isSuccess()) {
                 throw HttpException(response.status.value)
             }
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun getContents(
@@ -74,27 +69,49 @@ class RepoDetailsRepositoryImpl(
         repoName: String,
         path: String
     ): Result<List<GitHubContentItem>> {
-        return try {
+        return runCatching {
             val pathSegment = if (path.isEmpty()) "" else "/$path"
             val response = httpClient.get("repos/$ownerLogin/$repoName/contents$pathSegment")
             val items: List<GitHubContentItem> = response.body()
-            val sorted = items.sortedWith(
+            items.sortedWith(
                 compareBy<GitHubContentItem> { if (it.isDirectory) 0 else 1 }
                     .thenBy { it.name.lowercase() }
             )
-            Result.success(sorted)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     override suspend fun getFileContent(downloadUrl: String): Result<String> {
-        return try {
-            val response = httpClient.get(downloadUrl)
-            Result.success(response.body())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        return runCatching {
+            httpClient.get(downloadUrl).body<String>()
+        }.onFailure { if (it is CancellationException) throw it }
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override suspend fun uploadFile(
+        ownerLogin: String,
+        repoName: String,
+        filePath: String,
+        fileName: String,
+        fileBytes: ByteArray,
+        existingSha: String?,
+        message: String
+    ): Result<Unit> {
+        return runCatching {
+            val base64Content = Base64.encode(fileBytes)
+            val requestBody = UploadFileRequest(
+                message = message,
+                content = base64Content,
+                sha = existingSha?.ifEmpty { null }
+            )
+            val encodedPath = filePath.encodeURLPath()
+            val response = httpClient.put("repos/$ownerLogin/$repoName/contents/$encodedPath") {
+                contentType(ContentType.Application.Json)
+                setBody(requestBody)
+            }
+            if (!response.status.isSuccess()) {
+                throw HttpException(response.status.value)
+            }
+        }.onFailure { if (it is CancellationException) throw it }
     }
 
     private fun preprocessMarkdown(markdown: String, baseUrl: String?): String {

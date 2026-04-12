@@ -3,6 +3,7 @@ package com.github.rodionk77.feature.profile.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.rodionk77.common.Utils.UiText
+import com.github.rodionk77.feature.profile.data.models.GitHubEventEntity
 import com.github.rodionk77.feature.profile.domain.ProfileRepository
 import com.github.rodionk77.common.models.UserEntity
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +20,12 @@ import ktsproject.composeapp.generated.resources.unknown_error
 data class ProfileUiState(
     val isLoading: Boolean = true,
     val user: UserEntity = UserEntity(),
-    val error: UiText? = null
+    val error: UiText? = null,
+    val events: List<GitHubEventEntity> = emptyList(),
+    val eventsLoading: Boolean = false,
+    val eventsPaginating: Boolean = false,
+    val eventsPage: Int = 1,
+    val eventsHasReachedEnd: Boolean = false
 )
 
 sealed interface ProfileUiEvent {
@@ -46,6 +52,7 @@ class ProfileViewModel(
             val cached = repository.getCachedProfile()
             if (cached != null) {
                 _uiState.update { it.copy(isLoading = false, user = cached) }
+                loadEvents(cached.login)
             } else {
                 _uiState.update {
                     it.copy(
@@ -54,6 +61,52 @@ class ProfileViewModel(
                     )
                 }
             }
+        }
+    }
+
+    private fun loadEvents(username: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(eventsLoading = true) }
+            repository.getEvents(username, page = 1)
+                .onSuccess { events ->
+                    _uiState.update {
+                        it.copy(
+                            events = events,
+                            eventsLoading = false,
+                            eventsPage = 1,
+                            eventsHasReachedEnd = events.isEmpty()
+                        )
+                    }
+                }
+                .onFailure {
+                    _uiState.update { it.copy(eventsLoading = false) }
+                }
+        }
+    }
+
+    fun loadNextEventsPage() {
+        val state = _uiState.value
+        if (state.eventsPaginating || state.eventsHasReachedEnd || state.eventsLoading) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(eventsPaginating = true) }
+
+            val nextPage = state.eventsPage + 1
+            repository.getEvents(state.user.login, page = nextPage)
+                .onSuccess { newEvents ->
+                    val updated = (state.events + newEvents).distinctBy { it.id }
+                    _uiState.update {
+                        it.copy(
+                            eventsPaginating = false,
+                            events = updated,
+                            eventsPage = nextPage,
+                            eventsHasReachedEnd = newEvents.isEmpty()
+                        )
+                    }
+                }
+                .onFailure {
+                    _uiState.update { it.copy(eventsPaginating = false) }
+                }
         }
     }
 
